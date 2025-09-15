@@ -1,7 +1,32 @@
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  void _login() {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email == "test@test.com" && password == "123456") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login Successful")),
+      );
+      // TODO: Navigate to Home Page
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid credentials")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +56,7 @@ class LoginPage extends StatelessWidget {
 
               // Email Input
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   labelText: "Email or Username",
                   border: OutlineInputBorder(
@@ -42,11 +68,24 @@ class LoginPage extends StatelessWidget {
 
               // Password Input
               TextField(
-                obscureText: true,
+                controller: _passwordController,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: "Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -73,9 +112,7 @@ class LoginPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
-                  // TODO: Add login logic later
-                },
+                onPressed: _login,
                 child: const Text(
                   "Log In",
                   style: TextStyle(fontSize: 16, color: Colors.white),
