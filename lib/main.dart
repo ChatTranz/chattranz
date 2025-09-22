@@ -1,3 +1,4 @@
+import 'package:chattranz/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'pages/register_page.dart'; // Step 1: Import the new page
 
