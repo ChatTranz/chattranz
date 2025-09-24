@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       // Step 2: Define the initial route and the list of all available routes
       initialRoute: '/',
       routes: {
@@ -31,7 +32,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('ChatTranz'),
         backgroundColor: const Color.fromARGB(255, 58, 96, 183),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: Center(
         child: Column(
