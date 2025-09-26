@@ -12,12 +12,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       // Step 2: Define the initial route and the list of all available routes
       initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(), // The widget for the home route
-        '/register': (context) => const SignUpScreen(), // The widget for the register route
-        '/login': (context) => const LoginPage(), // The widget for the login route
+        '/register': (context) =>
+            const SignUpScreen(), // The widget for the register route
+        '/login': (context) =>
+            const LoginPage(), // The widget for the login route
       },
     );
   }
@@ -39,10 +42,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Welcome!',
-              style: TextStyle(fontSize: 24),
-            ),
+            const Text('Welcome!', style: TextStyle(fontSize: 24)),
             const SizedBox(height: 20),
             // Step 3: Add a button to navigate to the register page
             ElevatedButton(
