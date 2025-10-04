@@ -10,6 +10,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   String selectedLanguage = "English";
+  bool showAttachmentOptions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +20,10 @@ class _ChatPageState extends State<ChatPage> {
         preferredSize: const Size.fromHeight(120),
         child: Column(
           children: [
-            // Top Row: Back, Title, Options
+            // Top bar (Back, Title, Menu)
             Padding(
-              padding: const EdgeInsets.only(
-                  left: 8, right: 8, top: 12, bottom: 4),
+              padding:
+                  const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -32,30 +33,26 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   const Text(
                     "Message",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      // TODO: Dropdown options
-                    },
+                    onPressed: () {},
                   ),
                 ],
               ),
             ),
 
-            // AppBar body with image, name, status, language & call
+            // User info row
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
                 children: [
                   const CircleAvatar(
                     radius: 25,
-                    backgroundImage: NetworkImage(
-                        "https://i.pravatar.cc/150?img=3"), // demo image
+                    backgroundImage:
+                        NetworkImage("https://i.pravatar.cc/150?img=3"),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -65,9 +62,7 @@ class _ChatPageState extends State<ChatPage> {
                         const Text(
                           "David Wayne",
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 2),
                         const Text(
@@ -94,9 +89,7 @@ class _ChatPageState extends State<ChatPage> {
                   const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.call, color: Colors.blue),
-                    onPressed: () {
-                      // TODO: call action
-                    },
+                    onPressed: () {},
                   ),
                 ],
               ),
@@ -105,81 +98,140 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
 
-      // Chat body
-      body: Column(
-        children: [
-          // Chat messages
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
-                _buildReceivedMessage("This is your delivery driver...", "10:10"),
-                _buildSentMessage("Hi!", "10:10"),
-                _buildSentMessage(
-                    "Awesome, thanks for letting me know! Can't wait for my delivery. 🎉",
-                    "10:11"),
-                _buildReceivedMessage(
-                    "No problem at all! I'll be there in about 15 minutes.",
-                    "10:11"),
-                _buildReceivedMessage("I'll text you when I arrive.", "10:11"),
-                _buildSentMessage("Great! 😁", "10:12"),
-              ],
-            ),
-          ),
-
-          // Bottom input row
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          // Close attachment box when tapping outside
+          if (showAttachmentOptions) {
+            setState(() {
+              showAttachmentOptions = false;
+            });
+          }
+        },
+        child: Column(
+          children: [
+            // Chat messages
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(12),
                 children: [
-                  // Plus button
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline,
-                        size: 30, color: Colors.blue),
-                    onPressed: () {
-                      // TODO: File picker
-                    },
-                  ),
-
-                  // Text field
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Type a message...",
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Send button
-                  Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blue,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white),
-                      onPressed: () {
-                        // TODO: send message logic
-                      },
-                    ),
-                  ),
+                  _buildReceivedMessage("Hi! How are you?", "10:00"),
+                  _buildSentMessage("I’m good, thanks! You?", "10:01"),
                 ],
               ),
             ),
-          ),
-        ],
+
+            // Drop-up menu (no animation)
+            if (showAttachmentOptions)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _iconButtonOption(Icons.camera_alt, "Camera", () {
+                          // TODO: camera action
+                        }),
+                        _iconButtonOption(Icons.mic, "Voice", () {
+                          // TODO: voice record action
+                        }),
+                        _iconButtonOption(Icons.contacts, "Contact", () {
+                          // TODO: contact picker action
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _iconButtonOption(Icons.photo, "Gallery", () {
+                          // TODO: gallery action
+                        }),
+                        _iconButtonOption(Icons.location_on, "Location", () {
+                          // TODO: location picker action
+                        }),
+                        _iconButtonOption(
+                            Icons.insert_drive_file, "Document", () {
+                          // TODO: document picker action
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+            // Bottom input row
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    // Plus button
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline,
+                          size: 30, color: Colors.blue),
+                      onPressed: () {
+                        setState(() {
+                          showAttachmentOptions = !showAttachmentOptions;
+                        });
+                      },
+                    ),
+
+                    // Text field
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Type a message...",
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Send button
+                    Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.blue,
+                      ),
+                      child: IconButton(
+                        icon:
+                            const Icon(Icons.send, color: Colors.white, size: 22),
+                        onPressed: () {
+                          // TODO: send message logic
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,15 +250,10 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              text,
-              style: const TextStyle(color: Colors.white),
-            ),
+            Text(text, style: const TextStyle(color: Colors.white)),
             const SizedBox(height: 4),
-            Text(
-              time,
-              style: const TextStyle(color: Colors.white70, fontSize: 10),
-            ),
+            Text(time,
+                style: const TextStyle(color: Colors.white70, fontSize: 10)),
           ],
         ),
       ),
@@ -229,13 +276,28 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Text(text),
             const SizedBox(height: 4),
-            Text(
-              time,
-              style: const TextStyle(color: Colors.grey, fontSize: 10),
-            ),
+            Text(time,
+                style: const TextStyle(color: Colors.grey, fontSize: 10)),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _iconButtonOption(IconData icon, String label, VoidCallback onTap) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 25,
+          backgroundColor: Colors.blue[50],
+          child: IconButton(
+            icon: Icon(icon, color: Colors.blue, size: 26),
+            onPressed: onTap,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
     );
   }
 }

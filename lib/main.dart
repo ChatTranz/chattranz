@@ -1,3 +1,4 @@
+import 'package:chattranz/pages/conversation.dart';
 import 'package:chattranz/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'pages/register_page.dart'; // Step 1: Import the new page
@@ -21,6 +22,8 @@ class MyApp extends StatelessWidget {
             const SignUpScreen(), // The widget for the register route
         '/login': (context) =>
             const LoginPage(), // The widget for the login route
+        '/conversation': (context) =>
+            const ChatPage(), // The widget for the conversation route
       },
     );
   }
