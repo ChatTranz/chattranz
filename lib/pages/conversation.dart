@@ -22,8 +22,12 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             // Top bar (Back, Title, Menu)
             Padding(
-              padding:
-                  const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 4),
+              padding: const EdgeInsets.only(
+                left: 8,
+                right: 8,
+                top: 12,
+                bottom: 4,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -33,12 +37,87 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   const Text(
                     "Message",
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  IconButton(
+
+                  // Updated menu button with popup menu
+                  PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () {},
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'view':
+                          // TODO: Navigate to view contact page
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("View Contact tapped"),
+                            ),
+                          );
+                          break;
+                        case 'search':
+                          // TODO: Implement search functionality
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Search tapped")),
+                          );
+                          break;
+                        case 'report':
+                          // TODO: Handle report action
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Report tapped")),
+                          );
+                          break;
+                        case 'block':
+                          // TODO: Handle block action
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Block tapped")),
+                          );
+                          break;
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => [
+                      const PopupMenuItem(
+                        value: 'view',
+                        child: Row(
+                          children: [
+                            Icon(Icons.person, color: Colors.blue),
+                            SizedBox(width: 10),
+                            Text("View Contact"),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'search',
+                        child: Row(
+                          children: [
+                            Icon(Icons.search, color: Colors.blue),
+                            SizedBox(width: 10),
+                            Text("Search"),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'report',
+                        child: Row(
+                          children: [
+                            Icon(Icons.flag, color: Colors.red),
+                            SizedBox(width: 10),
+                            Text("Report"),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'block',
+                        child: Row(
+                          children: [
+                            Icon(Icons.block, color: Colors.red),
+                            SizedBox(width: 10),
+                            Text("Block"),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -51,8 +130,9 @@ class _ChatPageState extends State<ChatPage> {
                 children: [
                   const CircleAvatar(
                     radius: 25,
-                    backgroundImage:
-                        NetworkImage("https://i.pravatar.cc/150?img=3"),
+                    backgroundImage: NetworkImage(
+                      "https://i.pravatar.cc/150?img=3",
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -62,7 +142,9 @@ class _ChatPageState extends State<ChatPage> {
                         const Text(
                           "David Wayne",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         const Text(
@@ -75,10 +157,10 @@ class _ChatPageState extends State<ChatPage> {
                   DropdownButton<String>(
                     value: selectedLanguage,
                     items: ["English", "Sinhala", "Tamil"]
-                        .map((lang) => DropdownMenuItem(
-                              value: lang,
-                              child: Text(lang),
-                            ))
+                        .map(
+                          (lang) =>
+                              DropdownMenuItem(value: lang, child: Text(lang)),
+                        )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -124,12 +206,15 @@ class _ChatPageState extends State<ChatPage> {
             // Drop-up menu (no animation)
             if (showAttachmentOptions)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 24,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -166,9 +251,12 @@ class _ChatPageState extends State<ChatPage> {
                           // TODO: location picker action
                         }),
                         _iconButtonOption(
-                            Icons.insert_drive_file, "Document", () {
-                          // TODO: document picker action
-                        }),
+                          Icons.insert_drive_file,
+                          "Document",
+                          () {
+                            // TODO: document picker action
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -183,8 +271,11 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     // Plus button
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline,
-                          size: 30, color: Colors.blue),
+                      icon: const Icon(
+                        Icons.add_circle_outline,
+                        size: 30,
+                        color: Colors.blue,
+                      ),
                       onPressed: () {
                         setState(() {
                           showAttachmentOptions = !showAttachmentOptions;
@@ -219,8 +310,11 @@ class _ChatPageState extends State<ChatPage> {
                         color: Colors.blue,
                       ),
                       child: IconButton(
-                        icon:
-                            const Icon(Icons.send, color: Colors.white, size: 22),
+                        icon: const Icon(
+                          Icons.send,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                         onPressed: () {
                           // TODO: send message logic
                         },
@@ -252,8 +346,10 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Text(text, style: const TextStyle(color: Colors.white)),
             const SizedBox(height: 4),
-            Text(time,
-                style: const TextStyle(color: Colors.white70, fontSize: 10)),
+            Text(
+              time,
+              style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
           ],
         ),
       ),
@@ -276,8 +372,10 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Text(text),
             const SizedBox(height: 4),
-            Text(time,
-                style: const TextStyle(color: Colors.grey, fontSize: 10)),
+            Text(
+              time,
+              style: const TextStyle(color: Colors.grey, fontSize: 10),
+            ),
           ],
         ),
       ),
