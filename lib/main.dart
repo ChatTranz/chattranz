@@ -1,3 +1,4 @@
+import 'package:chattranz/pages/calling.dart';
 import 'package:chattranz/pages/conversation.dart';
 import 'package:chattranz/pages/login.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
             const LoginPage(), // The widget for the login route
         '/conversation': (context) =>
             const ChatPage(), // The widget for the conversation route
+        '/calling': (context) => const CallingScreen(), // The widget for the calling route
       },
     );
   }

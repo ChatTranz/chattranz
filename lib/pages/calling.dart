@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Placeholder image URL for demonstration. Replace with your actual asset or network path.
-const String dummyImageUrl = 'https://i.ibb.co/6P0L8yN/David-Wayne.png';
+const String dummyImageUrl = 'https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.webp';
 
 class CallingScreen extends StatelessWidget {
   const CallingScreen({super.key});
@@ -72,7 +72,6 @@ class CallingScreen extends StatelessWidget {
               radius: 60,
               // Use a placeholder or a network image for demonstration
               backgroundImage: const NetworkImage(dummyImageUrl),
-              backgroundColor: Colors.grey.shade800, // Fallback background
             ),
 
             // Vertical space between photo and name
