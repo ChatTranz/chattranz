@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) =>
             const SignUpScreen(), // The widget for the register route
         '/login': (context) =>
-            const LoginPage(), // The widget for the login route
+            const LoginScreen(), // The widget for the login route
         '/conversation': (context) =>
             const ChatPage(), // The widget for the conversation route
         '/calling': (context) => const CallingScreen(), // The widget for the calling route
