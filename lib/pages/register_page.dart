@@ -1,34 +1,10 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter SignUp UI',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        fontFamily: 'Inter', // A nice, clean font similar to the design
-      ),
-      home: const SignUpScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
-
 class _SignUpScreenState extends State<SignUpScreen> {
   // Controllers for the text fields
   final _phoneController = TextEditingController();
@@ -74,13 +50,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/chat_icon.png', // <-- Make sure you have this image in your assets folder
-                    height: 100,
+                  // Using an icon as a placeholder
+                  const Icon(
+                    Icons.chat_bubble_rounded,
+                    size: 80,
+                    color: Color(0xFF17B2F8),
                   ),
                   const SizedBox(height: 20),
-
-                  // --- Header Section ---
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -96,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.white, // This color is masked by the gradient
                           ),
                         ),
                       ),
@@ -116,8 +92,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   const SizedBox(height: 40),
-
-                  // --- Form Fields Section ---
                   _buildTextField(
                     controller: _phoneController,
                     hintText: 'Phone Number',
@@ -135,25 +109,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   _buildPasswordField(),
                   const SizedBox(height: 12),
                   const Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: Alignment.center,
                     child: Text(
                       'Password must be at least 6 characters',
                       style: TextStyle(fontSize: 14, color: Colors.black54),
                     ),
                   ),
                   const SizedBox(height: 30),
-
-                  // --- Sign Up Button ---
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        final phone = _phoneController.text;
-                        final email = _emailController.text;
-                        final password = _passwordController.text;
-                        print(
-                          'Sign Up attempt with: $phone, $email, $password',
-                        );
+                        // This line now correctly navigates to the next screen
+                        // because we defined the '/register-next' route in main.dart
+                        Navigator.pushNamed(context, '/register-next');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17B2F8),
@@ -173,8 +142,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // --- Log In Link ---
                   GestureDetector(
                     onTap: () {
                       print('Navigate to Log In screen');
@@ -210,7 +177,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Helper method to build a standard text field with the corrected border
+  // Helper method to build a standard text field
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -225,25 +192,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         hintStyle: const TextStyle(color: Colors.black38),
         filled: true,
         fillColor: const Color.fromARGB(213, 194, 236, 255),
-        
-        // CORRECTED: Use enabledBorder for the default state
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(
-            color: Colors.blue,
+            color: Color.fromARGB(255, 149, 207, 255),
             width: 1.0,
           ),
         ),
-
-        // CORRECTED: Use focusedBorder for the active state
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(
-            color: Colors.blue,
+            color: Color.fromARGB(255, 149, 207, 255),
             width: 1.0,
           ),
         ),
-        
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 20,
@@ -255,7 +217,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Helper method to build the password field with the corrected border
+  // Helper method to build the password field
   Widget _buildPasswordField() {
     return TextField(
       controller: _passwordController,
@@ -265,25 +227,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
         hintStyle: const TextStyle(color: Colors.black38),
         filled: true,
         fillColor: const Color.fromARGB(213, 194, 236, 255),
-        
-        // CORRECTED: Use enabledBorder for the default state
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(
-            color: Colors.blue,
+            color: Color.fromARGB(255, 149, 207, 255),
             width: 1.0,
           ),
         ),
-        
-        // CORRECTED: Use focusedBorder for the active state
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Colors.blue,
-            width: 1.0,
-          ),
+          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
-
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 20,
