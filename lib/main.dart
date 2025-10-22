@@ -1,3 +1,6 @@
+import 'package:chattranz/pages/calling.dart';
+import 'package:chattranz/pages/conversation.dart';
+import 'package:chattranz/pages/login.dart';
 import 'package:flutter/material.dart';
 // Make sure this file contains SignUpScreen
 import 'pages/register_page.dart';
@@ -17,10 +20,17 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
+ pages/signup
         '/': (context) => const HomePage(),
         '/register': (context) => const SignUpScreen(),
         // This route now correctly uses SignUpNextScreen from its own file
-        '/register-next': (context) => const SignUpNextScreen(),
+        '/register-next': (context) => const SignUpNextScreen(), // The widget for the register route
+        '/login': (context) =>
+            const LoginScreen(), // The widget for the login route
+        '/conversation': (context) =>
+            const ChatPage(), // The widget for the conversation route
+        '/calling': (context) => const CallingScreen(), // The widget for the calling route
+
       },
     );
   }
@@ -42,10 +52,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Welcome!',
-              style: TextStyle(fontSize: 24),
-            ),
+            const Text('Welcome!', style: TextStyle(fontSize: 24)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
