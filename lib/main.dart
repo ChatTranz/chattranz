@@ -1,3 +1,6 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'package:chattranz/pages/calling.dart';
 import 'package:chattranz/pages/conversation.dart';
 import 'package:chattranz/pages/login.dart';
@@ -7,7 +10,11 @@ import 'pages/register_page.dart';
 // Import the new file
 import 'pages/register_next_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -20,7 +27,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
- pages/signup
         '/': (context) => const HomePage(),
         '/register': (context) => const SignUpScreen(),
         // This route now correctly uses SignUpNextScreen from its own file

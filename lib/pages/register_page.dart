@@ -1,11 +1,20 @@
+import 'package:chattranz/services/auth_services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:flutter/material.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
+
 class _SignUpScreenState extends State<SignUpScreen> {
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
   // Controllers for the text fields
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -72,7 +81,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white, // This color is masked by the gradient
+                            color: Colors
+                                .white, // This color is masked by the gradient
                           ),
                         ),
                       ),
@@ -119,11 +129,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // This line now correctly navigates to the next screen
-                        // because we defined the '/register-next' route in main.dart
-                        Navigator.pushNamed(context, '/register-next');
+                      onPressed: () async {
+                        final email = _emailController.text.trim();
+                        final password = _passwordController.text.trim();
+
+                        if (email.isEmpty || password.isEmpty) {
+                          Fluttertoast.showToast(msg: "Please fill all fields");
+                          return;
+                        }
+
+                        setState(() => _isLoading = true);
+
+                        try {
+                          final user = await _authService.registerUser(
+                            email,
+                            password,
+                          );
+                          if (user != null) {
+                            Fluttertoast.showToast(
+                              msg: "Account created successfully!",
+                            );
+                            Navigator.pushNamed(context, '/register-next');
+                          }
+                        } catch (e) {
+                          Fluttertoast.showToast(msg: "Error: ${e.toString()}");
+                        } finally {
+                          setState(() => _isLoading = false);
+                        }
                       },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17B2F8),
                         elevation: 4,
@@ -144,7 +178,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 24),
                   GestureDetector(
                     onTap: () {
-                      print('Navigate to Log In screen');
+                      Navigator.pushNamed(context, '/login');
                     },
                     child: RichText(
                       text: const TextSpan(
