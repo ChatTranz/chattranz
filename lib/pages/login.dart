@@ -1,3 +1,6 @@
+import 'package:chattranz/services/auth_services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:flutter/material.dart';
 import 'register_page.dart'; // <-- Import your register page if you want navigation
 
@@ -9,6 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -29,7 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 30.0),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 30.0,
+              ),
               padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -121,11 +130,40 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        final email = _emailController.text;
-                        final password = _passwordController.text;
-                        print('Login attempt with: $email, $password');
+                      onPressed: () async {
+                        final email = _emailController.text.trim();
+                        final password = _passwordController.text.trim();
+
+                        if (email.isEmpty || password.isEmpty) {
+                          Fluttertoast.showToast(
+                            msg: "Please enter email and password",
+                          );
+                          return;
+                        }
+
+                        setState(() => _isLoading = true);
+
+                        try {
+                          final user = await _authService.loginUser(
+                            email,
+                            password,
+                          );
+                          if (user != null) {
+                            Fluttertoast.showToast(msg: "Login Successful!");
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/chatlist',
+                            ); // or Home
+                          }
+                        } catch (e) {
+                          Fluttertoast.showToast(
+                            msg: "Login failed: ${e.toString()}",
+                          );
+                        } finally {
+                          setState(() => _isLoading = false);
+                        }
                       },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17B2F8),
                         elevation: 4,
@@ -151,7 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Navigate to Register screen
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpScreen(),
+                        ),
                       );
                     },
                     child: RichText(
@@ -202,19 +242,16 @@ class _LoginScreenState extends State<LoginScreen> {
         fillColor: const Color.fromARGB(213, 194, 236, 255),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Colors.blue,
-            width: 1.0,
-          ),
+          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Colors.blue,
-            width: 1.0,
-          ),
+          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 20,
+        ),
         prefixIcon: prefixIcon != null
             ? Icon(prefixIcon, color: Colors.grey[700])
             : null,
@@ -240,7 +277,10 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 20,
+        ),
         prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[700]),
         suffixIcon: IconButton(
           icon: Icon(
