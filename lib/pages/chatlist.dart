@@ -39,26 +39,35 @@ class _ChatListPageState extends State<ChatListPage> {
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
             onPressed: () {
-              // Handle search action
+              // TODO: Implement search feature
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {
-              // Handle more options
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'add_friend') {
+                _showActionDialog(context, 'Add Friend');
+              } else if (value == 'create_group') {
+                _showActionDialog(context, 'Create Group');
+              }
             },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'add_friend',
+                child: Text('Add Friend'),
+              ),
+              const PopupMenuItem(
+                value: 'create_group',
+                child: Text('Create Group'),
+              ),
+            ],
+            icon: const Icon(Icons.more_vert, color: Colors.white),
           ),
         ],
       ),
+
+      // ✅ Chat list body
       body: ListView(
         children: [
-          _buildChatItem(
-            name: 'You',
-            message: 'Thanks a bunch! Have a great day! 😀',
-            time: '10:25',
-            unreadCount: 5,
-            avatarColor: Colors.brown,
-          ),
           _buildChatItem(
             name: 'David Wayne',
             message: 'Thanks a bunch! Have a great day! 😀',
@@ -73,50 +82,78 @@ class _ChatListPageState extends State<ChatListPage> {
             unreadCount: 12,
             avatarColor: Colors.blue,
           ),
-          _buildChatItem(
-            name: 'Angela Kelly',
-            message: 'Appreciate it! See you soon! 🚀',
-            time: '10:45 08/05',
-            unreadCount: 1,
-            avatarColor: Colors.brown,
-          ),
-          _buildChatItem(
-            name: 'Jean Dare',
-            message: 'Hooray! 🎉',
-            time: '20:10 05/05',
-            unreadCount: 0,
-            avatarColor: Colors.brown,
-          ),
-          _buildChatItem(
-            name: 'Dennis Borer',
-            message: 'Your order has been successfully delivered',
-            time: '17:02 05/05',
-            unreadCount: 0,
-            avatarColor: Colors.grey,
-          ),
-          _buildChatItem(
-            name: 'Cayla Rath',
-            message: 'See you soon!',
-            time: '11:20 05/05',
-            unreadCount: 0,
-            avatarColor: Colors.brown,
-          ),
-          _buildChatItem(
-            name: 'Erin Turcotte',
-            message: 'I\'m ready to drop off my delivery. 👍',
-            time: '19:35 02/05',
-            unreadCount: 0,
-            avatarColor: Colors.brown,
-          ),
-          _buildChatItem(
-            name: 'Rodolfo Walter',
-            message: 'Appreciate it! Hope you enjoy it!',
-            time: '07:55 01/05',
-            unreadCount: 0,
-            avatarColor: Colors.grey,
-          ),
+          // ... add more dummy chats if needed
         ],
       ),
+
+      // ✅ Floating Action Button
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF00BCD4),
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          _showFABOptions(context);
+        },
+      ),
+    );
+  }
+
+  // FAB menu options
+  void _showFABOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.person_add, color: Color(0xFF1976D2)),
+                title: const Text('Add Friend'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showActionDialog(context, 'Add Friend');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.group_add, color: Color(0xFF1976D2)),
+                title: const Text('Create Group'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showActionDialog(context, 'Create Group');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Placeholder dialog
+  void _showActionDialog(BuildContext context, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(title),
+          content: Text('Feature "$title" will be added soon!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF1976D2)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
