@@ -117,26 +117,6 @@ class _ChatListPageState extends State<ChatListPage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF00BCD4),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble),
-            label: 'Chats',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Groups'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.call), label: 'Calls'),
-        ],
-      ),
     );
   }
 
