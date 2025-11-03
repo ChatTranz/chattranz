@@ -1,6 +1,13 @@
-import 'dart:io';
+// For mobile/desktop only. Do NOT import dart:io on web builds.
+import 'dart:io' show File;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SignUpNextScreen extends StatefulWidget {
   const SignUpNextScreen({super.key});
@@ -10,20 +17,112 @@ class SignUpNextScreen extends StatefulWidget {
 }
 
 class _SignUpNextScreenState extends State<SignUpNextScreen> {
-  XFile? _imageFile;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
+  final TextEditingController _nameController = TextEditingController();
+  final String _defaultBio = "Hey there! I'm using ChatTranz 😄";
+
+  XFile? _imageFile;
+  Uint8List? _webImageBytes; // preview bytes for web
+  bool _isSaving = false;
+
+  // 🔹 Pick image (from gallery)
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-
-    // Open the gallery to choose an image
     final XFile? pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
+      imageQuality: 85,
     );
-
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = pickedFile;
-      });
+      if (kIsWeb) {
+        // Read bytes for preview on web
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _imageFile = pickedFile;
+          _webImageBytes = bytes;
+        });
+      } else {
+        setState(() => _imageFile = pickedFile);
+      }
+    }
+  }
+
+  // 🔹 Upload image to Firebase Storage (supports Web + Mobile)
+  Future<String?> uploadProfileImage(String uid, XFile image) async {
+    try {
+      final storageRef = _storage.ref().child(
+        'profile_pics/$uid/profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      final SettableMetadata meta = SettableMetadata(
+        contentType: image.mimeType ?? 'image/jpeg',
+      );
+
+      if (kIsWeb) {
+        final bytes = await image.readAsBytes();
+        await storageRef.putData(bytes, meta);
+      } else {
+        final file = File(image.path);
+        await storageRef.putFile(file, meta);
+      }
+
+      final downloadUrl = await storageRef.getDownloadURL();
+      print("✅ Image uploaded successfully: $downloadUrl");
+      return downloadUrl;
+    } catch (e) {
+      print('⚠️ Upload failed: $e');
+      Fluttertoast.showToast(msg: "Image upload failed!");
+      return null;
+    }
+  }
+
+  // 🔹 Save profile data to Firestore
+  Future<void> _saveProfile() async {
+    final user = _auth.currentUser;
+
+    if (user == null) {
+      Fluttertoast.showToast(msg: "User not logged in!");
+      return;
+    }
+
+    if (_nameController.text.trim().isEmpty) {
+      Fluttertoast.showToast(msg: "Please enter your name!");
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      print("✅ Starting profile save for UID: ${user.uid}");
+
+      // 🔹 Just use default image
+      final imageUrl =
+          "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // Default avatar
+
+      // 🔹 Write user data to Firestore
+      await _firestore.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'name': _nameController.text.trim(),
+        'bio': _defaultBio,
+        'profileImage': imageUrl,
+        'email': user.email,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      print("✅ Firestore write complete!");
+      Fluttertoast.showToast(msg: "Profile saved successfully!");
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/chatlist');
+      }
+    } catch (e, st) {
+      print("❌ Firestore error: $e");
+      print("🔍 Stacktrace: $st");
+      Fluttertoast.showToast(msg: "Failed to save profile!");
+    } finally {
+      setState(() => _isSaving = false);
     }
   }
 
@@ -39,7 +138,7 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
       ),
       body: Stack(
         children: [
-          // Blue Curved Header
+          // Blue curved header
           ClipPath(
             clipper: HeaderClipper(),
             child: Container(
@@ -48,7 +147,7 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
             ),
           ),
 
-          // Main Content
+          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -77,7 +176,12 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
                           245,
                         ),
                         backgroundImage: _imageFile != null
-                            ? FileImage(File(_imageFile!.path))
+                            ? (kIsWeb
+                                      ? (_webImageBytes != null
+                                            ? MemoryImage(_webImageBytes!)
+                                            : null)
+                                      : FileImage(File(_imageFile!.path)))
+                                  as ImageProvider?
                             : null,
                         child: _imageFile == null
                             ? const Icon(
@@ -90,27 +194,20 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
                       Positioned(
                         bottom: 0,
                         right: 0,
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors
-                              .click, // 👈 Changes cursor to a hand pointer
-                          child: GestureDetector(
-                            onTap: _pickImage,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFF1976D2),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 1,
-                                ),
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.edit,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF1976D2),
+                              border: Border.all(color: Colors.white, width: 1),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 20,
                               ),
                             ),
                           ),
@@ -122,9 +219,10 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
                   const SizedBox(height: 60),
 
                   // Name input
-                  const TextField(
-                    style: TextStyle(fontSize: 18),
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _nameController,
+                    style: const TextStyle(fontSize: 18),
+                    decoration: const InputDecoration(
                       prefixIcon: Icon(
                         Icons.person_outline,
                         color: Color.fromARGB(255, 87, 87, 87),
@@ -132,10 +230,7 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
                       hintText: 'Your Name',
                       hintStyle: TextStyle(color: Colors.grey),
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          width: 2.0,
-                        ),
+                        borderSide: BorderSide(color: Colors.black, width: 2.0),
                       ),
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
@@ -148,20 +243,18 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
 
                   const SizedBox(height: 40),
 
-                  // Next Button
+                  // Save button
                   Align(
                     alignment: Alignment.centerRight,
                     child: FloatingActionButton(
-                      onPressed: () {
-                        // Navigate back to the first route (home screen)
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
+                      onPressed: _isSaving ? null : _saveProfile,
                       backgroundColor: const Color(0xFF2196F3),
-                      elevation: 4,
-                      child: const Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                      ),
+                      child: _isSaving
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                            ),
                     ),
                   ),
                 ],
@@ -174,7 +267,7 @@ class _SignUpNextScreenState extends State<SignUpNextScreen> {
   }
 }
 
-// Curved header clipper
+// 🔹 Custom curved header
 class HeaderClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

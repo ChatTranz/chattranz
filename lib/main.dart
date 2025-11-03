@@ -9,12 +9,11 @@ import 'package:flutter/material.dart';
 import 'pages/register_page.dart';
 // Import the new file
 import 'pages/register_next_page.dart';
+import 'pages/chatlist.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -30,13 +29,16 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/register': (context) => const SignUpScreen(),
         // This route now correctly uses SignUpNextScreen from its own file
-        '/register-next': (context) => const SignUpNextScreen(), // The widget for the register route
+        '/register-next': (context) =>
+            const SignUpNextScreen(), // The widget for the register route
         '/login': (context) =>
             const LoginScreen(), // The widget for the login route
+        '/chatlist': (context) =>
+            const ChatListPage(), // The widget for the chatlist route
         '/conversation': (context) =>
             const ChatPage(), // The widget for the conversation route
-        '/calling': (context) => const CallingScreen(), // The widget for the calling route
-
+        '/calling': (context) =>
+            const CallingScreen(), // The widget for the calling route
       },
     );
   }

@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '203983592103',
     projectId: 'chattranz',
     authDomain: 'chattranz.firebaseapp.com',
-    storageBucket: 'chattranz.firebasestorage.app',
+    storageBucket: 'chattranz.appspot.com',
     measurementId: 'G-K6RV6DD04B',
   );
 
@@ -55,7 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:203983592103:android:6d71a22d964fa887849982',
     messagingSenderId: '203983592103',
     projectId: 'chattranz',
-    storageBucket: 'chattranz.firebasestorage.app',
+    storageBucket: 'chattranz.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     appId: '1:203983592103:ios:174d5c846f3d1b40849982',
     messagingSenderId: '203983592103',
     projectId: 'chattranz',
-    storageBucket: 'chattranz.firebasestorage.app',
+    storageBucket: 'chattranz.appspot.com',
     iosBundleId: 'com.example.chattranz',
   );
 
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     appId: '1:203983592103:ios:174d5c846f3d1b40849982',
     messagingSenderId: '203983592103',
     projectId: 'chattranz',
-    storageBucket: 'chattranz.firebasestorage.app',
+    storageBucket: 'chattranz.appspot.com',
     iosBundleId: 'com.example.chattranz',
   );
 
@@ -82,7 +82,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '203983592103',
     projectId: 'chattranz',
     authDomain: 'chattranz.firebaseapp.com',
-    storageBucket: 'chattranz.firebasestorage.app',
+    storageBucket: 'chattranz.appspot.com',
     measurementId: 'G-P9PFJZ3RPE',
   );
 }
