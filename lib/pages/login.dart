@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:flutter/material.dart';
 import 'register_page.dart'; // <-- Import your register page if you want navigation
+import 'main_navigation.dart'; // <-- Import main navigation page
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -150,10 +151,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                           if (user != null) {
                             Fluttertoast.showToast(msg: "Login Successful!");
-                            Navigator.pushReplacementNamed(
+                            Navigator.pushReplacement(
                               context,
-                              '/chatlist',
-                            ); // or Home
+                              MaterialPageRoute(
+                                builder: (context) => const MainNavigation(),
+                              ),
+                            );
                           }
                         } catch (e) {
                           Fluttertoast.showToast(
