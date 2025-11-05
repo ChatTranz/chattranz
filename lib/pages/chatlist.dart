@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'friend_requests_page.dart'; // Make sure this file exists
+import 'friend_requests_page.dart';
+import 'conversation.dart'; 
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
@@ -71,7 +72,10 @@ class _ChatListPageState extends State<ChatListPage> {
             },
             itemBuilder: (context) => const [
               PopupMenuItem(value: 'add_friend', child: Text('Add Friend')),
-              PopupMenuItem(value: 'friend_requests', child: Text('Friend Requests')),
+              PopupMenuItem(
+                value: 'friend_requests',
+                child: Text('Friend Requests'),
+              ),
               PopupMenuItem(value: 'create_group', child: Text('Create Group')),
             ],
           ),
@@ -122,7 +126,15 @@ class _ChatListPageState extends State<ChatListPage> {
                 title: Text(name),
                 subtitle: Text(email),
                 onTap: () {
-                  // TODO: Open chat page with this friend
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatPage(
+                        friendId: friend['friendId'] ?? friends[index].id, // friend's Firestore userId
+                        friendName: name,
+                      ),
+                    ),
+                  );
                 },
               );
             },
@@ -141,9 +153,7 @@ class _ChatListPageState extends State<ChatListPage> {
           title: const Text("Search Friends"),
           content: TextField(
             autofocus: true,
-            decoration: const InputDecoration(
-              hintText: "Enter name or email",
-            ),
+            decoration: const InputDecoration(hintText: "Enter name or email"),
             onChanged: (value) {
               setState(() => _searchQuery = value);
             },
@@ -154,7 +164,7 @@ class _ChatListPageState extends State<ChatListPage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-            )
+            ),
           ],
         );
       },
@@ -174,9 +184,7 @@ class _ChatListPageState extends State<ChatListPage> {
           title: const Text("Add Friend"),
           content: TextField(
             controller: emailController,
-            decoration: const InputDecoration(
-              hintText: "Enter friend's email",
-            ),
+            decoration: const InputDecoration(hintText: "Enter friend's email"),
           ),
           actions: [
             TextButton(
