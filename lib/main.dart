@@ -35,8 +35,23 @@ class MyApp extends StatelessWidget {
             const LoginScreen(), // The widget for the login route
         '/chatlist': (context) =>
             const ChatListPage(), // The widget for the chatlist route
-        '/conversation': (context) =>
-            const ChatPage(), // The widget for the conversation route
+        '/conversation': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is Map<String, dynamic> &&
+              args['friendId'] != null &&
+              args['friendName'] != null) {
+            return ChatPage(
+              friendId: args['friendId'] as String,
+              friendName: args['friendName'] as String,
+            );
+          }
+          // Fallback UI if arguments are missing or of wrong type
+          return const Scaffold(
+            body: Center(
+              child: Text('Missing friendId or friendName for ChatPage'),
+            ),
+          );
+        }, // The widget for the conversation route
         '/calling': (context) =>
             const CallingScreen(), // The widget for the calling route
       },
