@@ -1,32 +1,28 @@
 import 'package:chattranz/services/auth_services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:flutter/material.dart';
+import 'register_page.dart'; // <-- Import your register page if you want navigation
+import 'main_navigation.dart'; // <-- Import main navigation page
 
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
-  // Controllers for the text fields
-  final _phoneController = TextEditingController();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // State to toggle password visibility
   bool _isPasswordVisible = false;
 
   @override
   void dispose() {
-    // Dispose controllers when the widget is removed from the widget tree
-    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -59,13 +55,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Using an icon as a placeholder
-                  const Icon(
-                    Icons.chat_bubble_rounded,
-                    size: 80,
-                    color: Color(0xFF17B2F8),
+                  Image.asset(
+                    'assets/chat_icon.png', // same icon as register page
+                    height: 100,
                   ),
                   const SizedBox(height: 20),
+
+                  // --- Header Section ---
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -77,12 +73,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'Hello Sign Up ',
+                          'Welcome Back ',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors
-                                .white, // This color is masked by the gradient
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -97,18 +92,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Please fill the details and create account',
+                    'Login to your account to continue',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   const SizedBox(height: 40),
-                  _buildTextField(
-                    controller: _phoneController,
-                    hintText: 'Phone Number',
-                    keyboardType: TextInputType.phone,
-                    prefixIcon: Icons.phone_outlined,
-                  ),
-                  const SizedBox(height: 20),
+
+                  // --- Form Fields ---
                   _buildTextField(
                     controller: _emailController,
                     hintText: 'E-mail',
@@ -117,15 +107,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 20),
                   _buildPasswordField(),
-                  const SizedBox(height: 12),
-                  const Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Password must be at least 6 characters',
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                  const SizedBox(height: 10),
+
+                  // Forgot password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        print('Forgot Password clicked');
+                      },
+                      child: const Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          color: Color(0xFF4579F2),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+
+                  // --- Login Button ---
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -134,25 +136,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         final password = _passwordController.text.trim();
 
                         if (email.isEmpty || password.isEmpty) {
-                          Fluttertoast.showToast(msg: "Please fill all fields");
+                          Fluttertoast.showToast(
+                            msg: "Please enter email and password",
+                          );
                           return;
                         }
 
                         setState(() => _isLoading = true);
 
                         try {
-                          final user = await _authService.registerUser(
+                          final user = await _authService.loginUser(
                             email,
                             password,
                           );
                           if (user != null) {
-                            Fluttertoast.showToast(
-                              msg: "Account created successfully!",
+                            Fluttertoast.showToast(msg: "Login Successful!");
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MainNavigation(),
+                              ),
                             );
-                            Navigator.pushNamed(context, '/register-next');
                           }
                         } catch (e) {
-                          Fluttertoast.showToast(msg: "Error: ${e.toString()}");
+                          Fluttertoast.showToast(
+                            msg: "Login failed: ${e.toString()}",
+                          );
                         } finally {
                           setState(() => _isLoading = false);
                         }
@@ -166,7 +175,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         shape: const StadiumBorder(),
                       ),
                       child: const Text(
-                        'Sign Up',
+                        'Log In',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -176,13 +185,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // --- Sign Up Link ---
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/login');
+                      // Navigate to Register screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpScreen(),
+                        ),
+                      );
                     },
                     child: RichText(
                       text: const TextSpan(
-                        text: 'Already have an account? ',
+                        text: "Don't have an account? ",
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.black54,
@@ -190,7 +207,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         children: [
                           TextSpan(
-                            text: 'Log In',
+                            text: 'Sign Up',
                             style: TextStyle(
                               fontSize: 16,
                               color: Color(0xFF4579F2),
@@ -211,7 +228,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Helper method to build a standard text field
+  // --- Email Field Helper ---
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -228,17 +245,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         fillColor: const Color.fromARGB(213, 194, 236, 255),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Color.fromARGB(255, 149, 207, 255),
-            width: 1.0,
-          ),
+          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Color.fromARGB(255, 149, 207, 255),
-            width: 1.0,
-          ),
+          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
@@ -251,7 +262,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Helper method to build the password field
+  // --- Password Field Helper ---
   Widget _buildPasswordField() {
     return TextField(
       controller: _passwordController,
@@ -263,10 +274,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         fillColor: const Color.fromARGB(213, 194, 236, 255),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Color.fromARGB(255, 149, 207, 255),
-            width: 1.0,
-          ),
+          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),

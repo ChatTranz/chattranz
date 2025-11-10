@@ -1,7 +1,19 @@
-import 'package:flutter/material.dart';
-import 'pages/register_page.dart'; // Step 1: Import the new page
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+import 'package:chattranz/pages/calling.dart';
+import 'package:chattranz/pages/conversation.dart';
+import 'package:chattranz/pages/login.dart';
+import 'package:flutter/material.dart';
+// Make sure this file contains SignUpScreen
+import 'pages/register_page.dart';
+// Import the new file
+import 'pages/register_next_page.dart';
+import 'pages/chatlist.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -11,11 +23,37 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Step 2: Define the initial route and the list of all available routes
+      debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomePage(), // The widget for the home route
-        '/register': (context) => const SignUpScreen(), // The widget for the register route
+        '/': (context) => const HomePage(),
+        '/register': (context) => const SignUpScreen(),
+        // This route now correctly uses SignUpNextScreen from its own file
+        '/register-next': (context) =>
+            const SignUpNextScreen(), // The widget for the register route
+        '/login': (context) =>
+            const LoginScreen(), // The widget for the login route
+        '/chatlist': (context) =>
+            const ChatListPage(), // The widget for the chatlist route
+        '/conversation': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is Map<String, dynamic> &&
+              args['friendId'] != null &&
+              args['friendName'] != null) {
+            return ChatPage(
+              friendId: args['friendId'] as String,
+              friendName: args['friendName'] as String,
+            );
+          }
+          // Fallback UI if arguments are missing or of wrong type
+          return const Scaffold(
+            body: Center(
+              child: Text('Missing friendId or friendName for ChatPage'),
+            ),
+          );
+        }, // The widget for the conversation route
+        '/calling': (context) =>
+            const CallingScreen(), // The widget for the calling route
       },
     );
   }
@@ -31,21 +69,16 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('ChatTranz'),
         backgroundColor: const Color.fromARGB(255, 58, 96, 183),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Welcome!',
-              style: TextStyle(fontSize: 24),
-            ),
+            const Text('Welcome!', style: TextStyle(fontSize: 24)),
             const SizedBox(height: 20),
-            // Step 3: Add a button to navigate to the register page
             ElevatedButton(
               onPressed: () {
-                // When pressed, this will push the '/register' route onto the navigation stack
                 Navigator.pushNamed(context, '/register');
               },
               child: const Text('Go to Register Page'),
