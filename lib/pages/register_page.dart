@@ -1,8 +1,6 @@
 import 'package:chattranz/services/auth_services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
