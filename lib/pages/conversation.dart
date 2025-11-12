@@ -20,7 +20,9 @@ class _ChatPageState extends State<ChatPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool showAttachmentOptions = false;
-  String selectedLanguage = "English";
+  // User's preferred language code for receive-side translation
+  // Examples: 'en' (English), 'si' (Sinhala), 'ta' (Tamil), 'fr' (French)
+  String preferredLang = 'en';
   late String chatId;
 
   @override
@@ -28,34 +30,55 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     final currentUser = _auth.currentUser!;
     chatId = getChatId(currentUser.uid, widget.friendId);
+    _loadPreferredLang();
   }
 
   String getChatId(String user1, String user2) {
     return user1.hashCode <= user2.hashCode ? '$user1-$user2' : '$user2-$user1';
   }
 
-  // 🔹 Language Mapping for ML Kit
-  TranslateLanguage _mapLanguage(String lang) {
-    switch (lang) {
-      case "Sinhala":
-        // Fallback: Sinhala is not supported by on-device translation
-        return TranslateLanguage.english;
-      case "Tamil":
-        return TranslateLanguage.tamil;
-      default:
-        return TranslateLanguage.english;
+  // 🔹 Load preferred language code from Firestore (users/{uid}.preferredLang)
+  Future<void> _loadPreferredLang() async {
+    final uid = _auth.currentUser!.uid;
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        final code = (data?['preferredLang'] as String?)?.trim();
+        if (code != null && code.isNotEmpty) {
+          setState(() => preferredLang = code);
+        }
+      }
+    } catch (_) {
+      // ignore errors; keep default 'en'
     }
   }
 
-  // 🔹 Language Mapping for network translator (MyMemory)
-  String _mapLanguageCode(String lang) {
-    switch (lang) {
-      case "Sinhala":
-        return 'si';
-      case "Tamil":
-        return 'ta';
+  // 🔹 Save preferred language code to Firestore
+  Future<void> _savePreferredLang(String code) async {
+    final uid = _auth.currentUser!.uid;
+    try {
+      await _firestore.collection('users').doc(uid).set({
+        'preferredLang': code,
+      }, SetOptions(merge: true));
+    } catch (_) {
+      // optional: show a snackbar/toast on error
+    }
+  }
+
+  // 🔹 Map language code to ML Kit enum for on-send translation
+  TranslateLanguage _mapCodeToMLKit(String code) {
+    switch (code) {
+      case 'ta':
+        return TranslateLanguage.tamil;
+      case 'fr':
+        return TranslateLanguage.french;
+      case 'si':
+        // Sinhala not supported on-device; fallback to English
+        return TranslateLanguage.english;
+      case 'en':
       default:
-        return 'en';
+        return TranslateLanguage.english;
     }
   }
 
@@ -66,7 +89,7 @@ class _ChatPageState extends State<ChatPage> {
 
     // 🔹 Translate message
     final sourceLang = TranslateLanguage.english;
-    final targetLang = _mapLanguage(selectedLanguage);
+    final targetLang = _mapCodeToMLKit(preferredLang);
     final translator = OnDeviceTranslator(
       sourceLanguage: sourceLang,
       targetLanguage: targetLang,
@@ -98,10 +121,10 @@ class _ChatPageState extends State<ChatPage> {
   // 🔹 Stream that enriches messages with receiver-side translation for display
   Stream<List<Map<String, dynamic>>> _translatedMessagesStream(
     String chatId,
-    String selectedLanguage,
+    String preferredLang,
   ) {
     final currentUser = _auth.currentUser!;
-    final targetLang = _mapLanguageCode(selectedLanguage);
+    final targetLang = preferredLang; // already a code like 'en','si','ta','fr'
 
     return _firestore
         .collection('chats')
@@ -206,18 +229,18 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                   ),
                   DropdownButton<String>(
-                    value: selectedLanguage,
-                    items: ["English", "Sinhala", "Tamil"]
-                        .map(
-                          (lang) =>
-                              DropdownMenuItem(value: lang, child: Text(lang)),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedLanguage = value!;
-                      });
+                    value: preferredLang,
+                    onChanged: (String? newLang) {
+                      if (newLang == null) return;
+                      setState(() => preferredLang = newLang);
+                      _savePreferredLang(newLang);
                     },
+                    items: const [
+                      DropdownMenuItem(value: 'en', child: Text('English')),
+                      DropdownMenuItem(value: 'si', child: Text('Sinhala')),
+                      DropdownMenuItem(value: 'ta', child: Text('Tamil')),
+                      DropdownMenuItem(value: 'fr', child: Text('French')),
+                    ],
                   ),
                   const SizedBox(width: 8),
                   IconButton(
@@ -234,7 +257,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: _translatedMessagesStream(chatId, selectedLanguage),
+              stream: _translatedMessagesStream(chatId, preferredLang),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
