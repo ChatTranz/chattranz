@@ -447,31 +447,33 @@ class _ChatPageState extends State<ChatPage> {
                                 : Colors.grey.shade300,
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: isMe
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              (msg['displayText'] ??
-                                      msg['translatedText'] ??
-                                      msg['text'] ??
-                                      '')
-                                  .toString(),
-                              style: TextStyle(
-                                color: isMe ? Colors.white : Colors.black87,
+                        child: isMe
+                            ? // Sender's own message: show only the original text
+                              Text(
+                                (msg['text'] ?? '').toString(),
+                                style: const TextStyle(color: Colors.white),
+                              )
+                            : // Received message: show translated main + original small
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    (msg['displayText'] ?? msg['text'] ?? '')
+                                        .toString(),
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    (msg['text'] ?? '').toString(),
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              (msg['text'] ?? '').toString(),
-                              style: TextStyle(
-                                color: isMe ? Colors.white70 : Colors.grey,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     );
                   },
