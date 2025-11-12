@@ -71,6 +71,65 @@ class _ChatPageState extends State<ChatPage> {
   // 🔹 Map language code to ML Kit enum for on-send translation
   TranslateLanguage _mapCodeToMLKit(String code) {
     switch (code) {
+      case 'zh':
+      case 'zh-CN':
+        return TranslateLanguage.chinese;
+      case 'es':
+        return TranslateLanguage.spanish;
+      case 'de':
+        return TranslateLanguage.german;
+      case 'hi':
+        return TranslateLanguage.hindi;
+      case 'ja':
+        return TranslateLanguage.japanese;
+      case 'ar':
+        return TranslateLanguage.arabic;
+      case 'ru':
+        return TranslateLanguage.russian;
+      case 'pt':
+        return TranslateLanguage.portuguese;
+      case 'it':
+        return TranslateLanguage.italian;
+      case 'tr':
+        return TranslateLanguage.turkish;
+      case 'ur':
+        return TranslateLanguage.urdu;
+      case 'bn':
+        return TranslateLanguage.bengali;
+      case 'ko':
+        return TranslateLanguage.korean;
+      case 'vi':
+        return TranslateLanguage.vietnamese;
+      case 'id':
+        return TranslateLanguage.indonesian;
+      case 'th':
+        return TranslateLanguage.thai;
+      case 'uk':
+        return TranslateLanguage.ukrainian;
+      case 'pl':
+        return TranslateLanguage.polish;
+      case 'nl':
+        return TranslateLanguage.dutch;
+      case 'el':
+        return TranslateLanguage.greek;
+      case 'sv':
+        return TranslateLanguage.swedish;
+      case 'cs':
+        return TranslateLanguage.czech;
+      case 'ro':
+        return TranslateLanguage.romanian;
+      case 'hu':
+        return TranslateLanguage.hungarian;
+      case 'sk':
+        return TranslateLanguage.slovak;
+      case 'te':
+        return TranslateLanguage.telugu;
+      case 'kn':
+        return TranslateLanguage.kannada;
+      case 'gu':
+        return TranslateLanguage.gujarati;
+      case 'mr':
+        return TranslateLanguage.marathi;
       case 'ta':
         return TranslateLanguage.tamil;
       case 'fr':
@@ -87,6 +146,36 @@ class _ChatPageState extends State<ChatPage> {
   bool _mlKitSupports(String code) {
     switch (code) {
       case 'en':
+      case 'zh':
+      case 'zh-CN':
+      case 'es':
+      case 'de':
+      case 'hi':
+      case 'ja':
+      case 'ar':
+      case 'ru':
+      case 'pt':
+      case 'it':
+      case 'tr':
+      case 'ur':
+      case 'bn':
+      case 'ko':
+      case 'vi':
+      case 'id':
+      case 'th':
+      case 'uk':
+      case 'pl':
+      case 'nl':
+      case 'el':
+      case 'sv':
+      case 'cs':
+      case 'ro':
+      case 'hu':
+      case 'sk':
+      case 'te':
+      case 'kn':
+      case 'gu':
+      case 'mr':
       case 'ta':
       case 'fr':
         return true;
@@ -281,6 +370,34 @@ class _ChatPageState extends State<ChatPage> {
                       DropdownMenuItem(value: 'si', child: Text('Sinhala')),
                       DropdownMenuItem(value: 'ta', child: Text('Tamil')),
                       DropdownMenuItem(value: 'fr', child: Text('French')),
+                      DropdownMenuItem(value: 'es', child: Text('Spanish')),
+                      DropdownMenuItem(value: 'de', child: Text('German')),
+                      DropdownMenuItem(value: 'hi', child: Text('Hindi')),
+                      DropdownMenuItem(
+                        value: 'zh-CN',
+                        child: Text('Chinese (Simplified)'),
+                      ),
+                      DropdownMenuItem(value: 'ja', child: Text('Japanese')),
+                      DropdownMenuItem(value: 'ar', child: Text('Arabic')),
+                      DropdownMenuItem(value: 'ru', child: Text('Russian')),
+                      DropdownMenuItem(value: 'pt', child: Text('Portuguese')),
+                      DropdownMenuItem(value: 'it', child: Text('Italian')),
+                      DropdownMenuItem(value: 'tr', child: Text('Turkish')),
+                      DropdownMenuItem(value: 'ur', child: Text('Urdu')),
+                      DropdownMenuItem(value: 'bn', child: Text('Bengali')),
+                      DropdownMenuItem(value: 'ko', child: Text('Korean')),
+                      DropdownMenuItem(value: 'vi', child: Text('Vietnamese')),
+                      DropdownMenuItem(value: 'id', child: Text('Indonesian')),
+                      DropdownMenuItem(value: 'th', child: Text('Thai')),
+                      DropdownMenuItem(value: 'nl', child: Text('Dutch')),
+                      DropdownMenuItem(value: 'el', child: Text('Greek')),
+                      DropdownMenuItem(value: 'sv', child: Text('Swedish')),
+                      DropdownMenuItem(value: 'cs', child: Text('Czech')),
+                      DropdownMenuItem(value: 'ro', child: Text('Romanian')),
+                      DropdownMenuItem(value: 'hu', child: Text('Hungarian')),
+                      DropdownMenuItem(value: 'sk', child: Text('Slovak')),
+                      DropdownMenuItem(value: 'pl', child: Text('Polish')),
+                      DropdownMenuItem(value: 'uk', child: Text('Ukrainian')),
                     ],
                   ),
                   const SizedBox(width: 8),
