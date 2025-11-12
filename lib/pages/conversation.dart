@@ -23,6 +23,8 @@ class _ChatPageState extends State<ChatPage> {
   // User's preferred language code for receive-side translation
   // Examples: 'en' (English), 'si' (Sinhala), 'ta' (Tamil), 'fr' (French)
   String preferredLang = 'en';
+  // Simple in-memory cache: messageId -> { langCode: translatedText }
+  final Map<String, Map<String, String>> _translationCache = {};
   late String chatId;
 
   @override
@@ -82,23 +84,54 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  bool _mlKitSupports(String code) {
+    switch (code) {
+      case 'en':
+      case 'ta':
+      case 'fr':
+        return true;
+      case 'si':
+      default:
+        return false;
+    }
+  }
+
+  Future<String> _getUserPreferredLang(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        final code = (data?['preferredLang'] as String?)?.trim();
+        if (code != null && code.isNotEmpty) return code;
+      }
+    } catch (_) {}
+    return 'en';
+  }
+
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
     final currentUser = _auth.currentUser!;
     final timestamp = FieldValue.serverTimestamp();
 
-    // 🔹 Translate message
-    final sourceLang = TranslateLanguage.english;
-    final targetLang = _mapCodeToMLKit(preferredLang);
-    final translator = OnDeviceTranslator(
-      sourceLanguage: sourceLang,
-      targetLanguage: targetLang,
-    );
-
+    // 🔹 Determine friend's preferred language and translate accordingly
+    final friendLang = await _getUserPreferredLang(widget.friendId);
     String translatedText = text;
     try {
-      translatedText = await translator.translateText(text);
+      if (_mlKitSupports(friendLang)) {
+        final translator = OnDeviceTranslator(
+          sourceLanguage: TranslateLanguage.english,
+          targetLanguage: _mapCodeToMLKit(friendLang),
+        );
+        translatedText = await translator.translateText(text);
+      } else {
+        // Fallback to network API for unsupported languages (e.g., Sinhala)
+        translatedText = await TranslationService.translateText(
+          text,
+          friendLang,
+        );
+      }
     } catch (e) {
+      // ignore: avoid_print
       print("Translation error: $e");
     }
 
@@ -140,21 +173,29 @@ class _ChatPageState extends State<ChatPage> {
               final data = doc.data();
               final isMe = data['senderId'] == currentUser.uid;
               final original = (data['text'] ?? '').toString();
+              final messageId = doc.id;
 
               String display = original;
               if (!isMe && original.isNotEmpty) {
-                try {
-                  display = await TranslationService.translateText(
-                    original,
-                    targetLang,
-                  );
-                } catch (e) {
-                  // ignore translation failures and show original
-                  display = original;
+                // Check in-memory cache first
+                final cached = _translationCache[messageId]?[targetLang];
+                if (cached != null) {
+                  display = cached;
+                } else {
+                  try {
+                    display = await TranslationService.translateText(
+                      original,
+                      targetLang,
+                    );
+                    _translationCache.putIfAbsent(messageId, () => {});
+                    _translationCache[messageId]![targetLang] = display;
+                  } catch (e) {
+                    display = original;
+                  }
                 }
               }
 
-              return {...data, 'displayText': display};
+              return {...data, 'id': messageId, 'displayText': display};
             }),
           );
           return results;
