@@ -5,15 +5,20 @@ import 'package:chattranz/pages/calling.dart';
 import 'package:chattranz/pages/conversation.dart';
 import 'package:chattranz/pages/login.dart';
 import 'package:flutter/material.dart';
-// Make sure this file contains SignUpScreen
 import 'pages/register_page.dart';
-// Import the new file
 import 'pages/register_next_page.dart';
 import 'pages/chatlist.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // ✅ Initialize Firebase only once
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
   runApp(const MyApp());
 }
 
@@ -28,13 +33,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/register': (context) => const SignUpScreen(),
-        // This route now correctly uses SignUpNextScreen from its own file
-        '/register-next': (context) =>
-            const SignUpNextScreen(), // The widget for the register route
-        '/login': (context) =>
-            const LoginScreen(), // The widget for the login route
-        '/chatlist': (context) =>
-            const ChatListPage(), // The widget for the chatlist route
+        '/register-next': (context) => const SignUpNextScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/chatlist': (context) => const ChatListPage(),
         '/conversation': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           if (args is Map<String, dynamic> &&
@@ -45,21 +46,18 @@ class MyApp extends StatelessWidget {
               friendName: args['friendName'] as String,
             );
           }
-          // Fallback UI if arguments are missing or of wrong type
           return const Scaffold(
             body: Center(
               child: Text('Missing friendId or friendName for ChatPage'),
             ),
           );
-        }, // The widget for the conversation route
-        '/calling': (context) =>
-            const CallingScreen(), // The widget for the calling route
+        },
+        '/calling': (context) => const CallingScreen(),
       },
     );
   }
 }
 
-// A new widget for your home screen that can navigate
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -68,8 +66,8 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ChatTranz'),
-        backgroundColor: const Color.fromARGB(255, 58, 96, 183),
-        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Color.fromARGB(255, 58, 96, 183),
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: Column(
