@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:chattranz/services/translation_service.dart';
+import 'package:chattranz/pages/friends_profile.dart';
 
 class ChatPage extends StatefulWidget {
   final String friendId;
@@ -333,10 +334,20 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 25,
-                    backgroundImage: NetworkImage(
-                      "https://i.pravatar.cc/150?img=3",
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              FriendsProfileScreen(friendId: widget.friendId),
+                        ),
+                      );
+                    },
+                    child: const CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(
+                        "https://i.pravatar.cc/150?img=3",
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
