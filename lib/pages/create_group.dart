@@ -138,7 +138,8 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         'name': name,
         'members': members,
         'creatorId': currentUser.uid,
-        'createdAt': FieldValue.serverTimestamp(),
+        // Use a client-side timestamp so the UI sees the new group immediately
+        'createdAt': Timestamp.now(),
       });
       Navigator.of(context).pop();
       ScaffoldMessenger.of(
