@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chattranz/pages/create_group.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// Group info is displayed inline via a bottom sheet; no extra page import.
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -24,6 +25,175 @@ class _GroupsScreenState extends State<GroupsScreen> {
         .where((d) => d.exists)
         .map((d) => {'id': d.id, 'data': d.data()})
         .toList();
+  }
+
+  void _showAddMemberDialog(BuildContext context, String groupId) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Member'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Email or user ID'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // TODO: Look up user by email and add their uid to members
+              Navigator.pop(ctx);
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Invite sent / member added')),
+              );
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLeaveGroupDialog(BuildContext context, String groupId) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Exit Group'),
+        content: const Text('Are you sure you want to exit this group?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              if (uid != null) {
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('groups')
+                      .doc(groupId)
+                      .update({
+                        'members': FieldValue.arrayRemove([uid]),
+                      });
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Exited group')));
+                } catch (e) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Failed to exit: $e')));
+                }
+              }
+            },
+            child: const Text('Exit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteGroup(BuildContext context, String groupId) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Group'),
+        content: const Text(
+          'This will permanently delete the group for all members.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await FirebaseFirestore.instance
+                    .collection('groups')
+                    .doc(groupId)
+                    .delete();
+                if (!mounted) return;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Group deleted')));
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGroupInfoBottomSheet(
+    BuildContext context, {
+    required String groupName,
+    required List<dynamic> members,
+    Timestamp? createdAt,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Group Info',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  child: Text(
+                    groupName.isNotEmpty ? groupName[0].toUpperCase() : 'G',
+                  ),
+                ),
+                title: Text(groupName),
+                subtitle: Text('${members.length} members'),
+              ),
+              if (createdAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Created: ${DateTime.fromMillisecondsSinceEpoch(createdAt.millisecondsSinceEpoch)}',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showGroupMembers(BuildContext context, List<dynamic> memberIds) async {
@@ -150,9 +320,45 @@ class _GroupsScreenState extends State<GroupsScreen> {
                   ),
                   title: Text(name),
                   subtitle: Text('${members.length} members'),
-                  trailing: IconButton(
+                  trailing: PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () => _showGroupMembers(context, members),
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'info':
+                          _showGroupInfoBottomSheet(
+                            context,
+                            groupName: name,
+                            members: members,
+                            createdAt: data['createdAt'] as Timestamp?,
+                          );
+                          break;
+                        case 'add':
+                          _showAddMemberDialog(context, d.id);
+                          break;
+                        case 'pin':
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Group pinned')),
+                          );
+                          break;
+                        case 'exit':
+                          _showLeaveGroupDialog(context, d.id);
+                          break;
+                        case 'delete':
+                          _confirmDeleteGroup(context, d.id);
+                          break;
+                      }
+                    },
+                    itemBuilder: (ctx) => const [
+                      PopupMenuItem(value: 'info', child: Text('Group Info')),
+                      PopupMenuItem(value: 'add', child: Text('Add Members')),
+                      PopupMenuItem(value: 'pin', child: Text('Pin Group')),
+                      PopupMenuItem(value: 'exit', child: Text('Exit Group')),
+                      PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Text('Delete Group'),
+                      ),
+                    ],
                   ),
                 ),
               );
