@@ -292,24 +292,43 @@ class _GroupChatPageState extends State<GroupChatPage> {
                 if (cached != null) {
                   display = cached;
                 } else {
-                  try {
-                    if (_mlKitSupports(targetLang)) {
+                  bool success = false;
+                  // First attempt on-device translation (if supported)
+                  if (_mlKitSupports(targetLang)) {
+                    try {
                       final translator = OnDeviceTranslator(
                         sourceLanguage: TranslateLanguage.english,
                         targetLanguage: _mapCodeToMLKit(targetLang),
                       );
-                      display = await translator.translateText(original);
-                    } else {
-                      display = await TranslationService.translateText(
+                      final translated = await translator.translateText(
+                        original,
+                      );
+                      await translator.close();
+                      if (translated.isNotEmpty && translated != original) {
+                        display = translated;
+                        success = true;
+                      }
+                    } catch (_) {
+                      success = false;
+                    }
+                  }
+                  // Fallback to network translation service if on-device failed or unsupported
+                  if (!success) {
+                    try {
+                      final translated = await TranslationService.translateText(
                         original,
                         targetLang,
                       );
+                      if (translated.isNotEmpty) {
+                        display = translated;
+                        success = true;
+                      }
+                    } catch (_) {
+                      // keep original
                     }
-                    _translationCache.putIfAbsent(doc.id, () => {});
-                    _translationCache[doc.id]![targetLang] = display;
-                  } catch (_) {
-                    display = original; // fallback
                   }
+                  _translationCache.putIfAbsent(doc.id, () => {});
+                  _translationCache[doc.id]![targetLang] = display;
                 }
               }
               return {...data, 'id': doc.id, 'displayText': display};
