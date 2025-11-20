@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chattranz/pages/create_group.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'group_chat_page.dart';
 // Group info is displayed inline via a bottom sheet; no extra page import.
 
 class GroupsScreen extends StatefulWidget {
@@ -196,65 +197,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
   }
 
-  void _showGroupMembers(BuildContext context, List<dynamic> memberIds) async {
-    final members = await _fetchMembers(memberIds);
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: SizedBox(
-          height: 400,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Members',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: members.length,
-                  itemBuilder: (context, index) {
-                    final m = members[index];
-                    final data = m['data'] as Map<String, dynamic>?;
-                    final name =
-                        (data?['displayName'] ??
-                                data?['name'] ??
-                                data?['email'] ??
-                                'User')
-                            .toString();
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text(
-                          name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        ),
-                      ),
-                      title: Text(name),
-                      subtitle: Text(data?['email'] ?? ''),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // (Old member bottom sheet kept for reference; now group tap opens chat.)
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +257,16 @@ class _GroupsScreenState extends State<GroupsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  onTap: () => _showGroupMembers(context, members),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => GroupChatPage(
+                        groupId: d.id,
+                        groupName: name,
+                        memberIds: members,
+                      ),
+                    ),
+                  ),
                   leading: CircleAvatar(
                     child: Text(name.isNotEmpty ? name[0].toUpperCase() : 'G'),
                   ),
