@@ -26,6 +26,7 @@ class _CallingScreenState extends State<CallingScreen> {
   final _service = CallService();
   Timer? _simulationTimer1;
   Timer? _simulationTimer2; // kept for backward-compat; not used to auto-answer
+  bool _popped = false; // prevent double pop when remote ends/declines
 
   @override
   void initState() {
@@ -44,6 +45,13 @@ class _CallingScreenState extends State<CallingScreen> {
           if (data != null) {
             final newStatus = data['status'] as String? ?? 'calling';
             if (mounted) setState(() => _status = newStatus);
+            // Auto-close screen if remote declines or ends the call.
+            if ((newStatus == 'declined' || newStatus == 'ended') && !_popped) {
+              _popped = true;
+              if (mounted && Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            }
           }
         });
   }
@@ -183,6 +191,8 @@ class _CallingScreenState extends State<CallingScreen> {
         return 'Connected';
       case 'ended':
         return 'Ended';
+      case 'declined':
+        return 'Declined';
       default:
         return _status;
     }
