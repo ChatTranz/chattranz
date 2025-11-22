@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'chatlist.dart';
 import 'groups_screen.dart';
 import 'calls_screen.dart';
+import 'calling.dart';
 import 'profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/call_service.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -17,7 +17,6 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
-  final _auth = FirebaseAuth.instance;
   final _callService = CallService();
 
   final List<Widget> _pages = [
@@ -33,7 +32,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = _auth.currentUser;
+    // Removed unused currentUser variable.
     return StreamBuilder<List<DocumentSnapshot<Map<String, dynamic>>>>(
       stream: _callService.incomingCallsStream(),
       builder: (context, snapshot) {
@@ -57,10 +56,29 @@ class _MainNavigationState extends State<MainNavigation> {
                 _IncomingCallOverlay(
                   callDoc: activeIncoming,
                   onAccept: () async {
+                    // Update status to answered first.
                     await _callService.updateStatus(
                       activeIncoming!.id,
                       'answered',
                     );
+                    // Extract caller info from call document.
+                    final data = activeIncoming.data();
+                    final callerId = data?['callerId'] as String? ?? '';
+                    final callerName =
+                        data?['callerName'] as String? ?? 'Unknown';
+                    if (mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CallingScreen(
+                            callId: activeIncoming!.id,
+                            friendId: callerId,
+                            friendName: callerName,
+                            friendPhotoUrl: null, // Could be fetched if needed
+                          ),
+                        ),
+                      );
+                    }
                   },
                   onDecline: () async {
                     await _callService.declineCall(activeIncoming!.id);
