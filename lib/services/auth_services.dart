@@ -25,6 +25,11 @@ class AuthService {
         email: email,
         password: password,
       );
+      // Mark user online on successful login
+      await _firestore.collection('users').doc(result.user!.uid).set({
+        'online': true,
+        'lastActive': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
       return result.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message);
@@ -33,6 +38,13 @@ class AuthService {
 
   // 🟣 Logout
   Future<void> logoutUser() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).set({
+        'online': false,
+        'lastActive': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
     await _auth.signOut();
   }
 
@@ -54,4 +66,12 @@ class AuthService {
 
   // 🔴 Get current user
   User? get currentUser => _auth.currentUser;
+
+  // Helper to fetch online status of a user
+  Future<bool> isUserOnline(String uid) async {
+    final doc = await _firestore.collection('users').doc(uid).get();
+    final data = doc.data();
+    if (data == null) return false;
+    return (data['online'] as bool?) ?? false;
+  }
 }

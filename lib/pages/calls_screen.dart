@@ -46,6 +46,7 @@ class _CallsScreenState extends State<CallsScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to start call: $e')));
@@ -98,7 +99,7 @@ class _CallsScreenState extends State<CallsScreen> {
                   if (d.data()['uid'] == currentUser?.uid)
                     return false; // exclude self
                   if (_searchQuery.isEmpty)
-                    return false; // show only when searching
+                    return false; // only show results when searching
                   final name = (d.data()['name'] ?? '') as String;
                   return name.toLowerCase().contains(_searchQuery);
                 }).toList();
@@ -129,10 +130,38 @@ class _CallsScreenState extends State<CallsScreen> {
                     },
                   );
                 }
-                // When not searching show call log
                 return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: _callService.myCallsStream(),
                   builder: (context, callSnap) {
+                    if (callSnap.hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load call log. ${callSnap.error}',
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'If Firestore shows an index error, create composite index: calls(participants arrayContains, startedAt desc).',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                     if (callSnap.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
@@ -141,8 +170,9 @@ class _CallsScreenState extends State<CallsScreen> {
                       return const Center(child: Text('No calls yet'));
                     }
                     final currentId = currentUser?.uid ?? '';
-                    return ListView.builder(
+                    return ListView.separated(
                       itemCount: callDocs.length,
+                      separatorBuilder: (_, __) => const Divider(height: 0),
                       itemBuilder: (context, index) {
                         final doc = callDocs[index];
                         final entry = CallLogEntry.fromDoc(
@@ -154,17 +184,25 @@ class _CallsScreenState extends State<CallsScreen> {
                             ? Icons.call_made
                             : Icons.call_received;
                         return ListTile(
-                          leading: Icon(
-                            icon,
-                            color: entry.isOutgoing
-                                ? Colors.green
-                                : Colors.blue,
+                          leading: CircleAvatar(
+                            backgroundColor: entry.isOutgoing
+                                ? Colors.green.withOpacity(.15)
+                                : Colors.blue.withOpacity(.15),
+                            child: Icon(
+                              icon,
+                              color: entry.isOutgoing
+                                  ? Colors.green
+                                  : Colors.blue,
+                            ),
                           ),
                           title: Text(entry.otherName),
-                          subtitle: Text(entry.status),
+                          subtitle: Text(_statusLabel(entry.status)),
+                          trailing: Text(
+                            _timeLabel(doc.data()['startedAt'] as Timestamp?),
+                          ),
                           onTap: () {
-                            // Re-open existing call screen if still active
-                            if (entry.status != 'ended') {
+                            if (entry.status != 'ended' &&
+                                entry.status != 'declined') {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -189,36 +227,32 @@ class _CallsScreenState extends State<CallsScreen> {
       ),
     );
   }
-}
 
-class CallLogEntry {
-  final String id;
-  final String otherName;
-  final bool isOutgoing;
-  final String status;
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'calling':
+        return 'Calling';
+      case 'ringing':
+        return 'Ringing';
+      case 'answered':
+        return 'In Call';
+      case 'ended':
+        return 'Ended';
+      case 'declined':
+        return 'Declined';
+      default:
+        return status;
+    }
+  }
 
-  CallLogEntry({
-    required this.id,
-    required this.otherName,
-    required this.isOutgoing,
-    required this.status,
-  });
-
-  factory CallLogEntry.fromDoc(
-    String id,
-    Map<String, dynamic> data,
-    String currentUserId,
-  ) {
-    final callerId = data['callerId'] as String? ?? '';
-    final isOutgoing = callerId == currentUserId;
-    final otherName = isOutgoing
-        ? (data['receiverName'] as String? ?? 'Unknown')
-        : (data['callerName'] as String? ?? 'Unknown');
-    return CallLogEntry(
-      id: id,
-      otherName: otherName,
-      isOutgoing: isOutgoing,
-      status: data['status'] as String? ?? 'calling',
-    );
+  String _timeLabel(Timestamp? ts) {
+    if (ts == null) return '';
+    final dt = ts.toDate();
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inMinutes < 1) return '${diff.inSeconds}s ago';
+    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${dt.month}/${dt.day}';
   }
 }
