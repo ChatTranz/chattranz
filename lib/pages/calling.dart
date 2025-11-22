@@ -25,7 +25,7 @@ class _CallingScreenState extends State<CallingScreen> {
   String _status = 'calling';
   final _service = CallService();
   Timer? _simulationTimer1;
-  Timer? _simulationTimer2;
+  Timer? _simulationTimer2; // kept for backward-compat; not used to auto-answer
 
   @override
   void initState() {
@@ -54,10 +54,8 @@ class _CallingScreenState extends State<CallingScreen> {
       if (_status == 'calling')
         await _service.updateStatus(widget.callId, 'ringing');
     });
-    _simulationTimer2 = Timer(const Duration(seconds: 5), () async {
-      if (_status == 'ringing')
-        await _service.updateStatus(widget.callId, 'answered');
-    });
+    // NOTE: removed automatic transition to 'answered' after a timeout.
+    // The call should only be answered by an explicit user action.
   }
 
   Future<void> _end() async {
