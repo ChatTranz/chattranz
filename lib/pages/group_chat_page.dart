@@ -259,7 +259,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
       case 'fr':
         return TranslateLanguage.french;
       case 'si':
-        return TranslateLanguage.english; // fallback for Sinhala
+        return TranslateLanguage.english; 
       case 'en':
       default:
         return TranslateLanguage.english;
