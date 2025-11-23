@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:chattranz/services/translation_service.dart';
+import 'package:chattranz/services/group_service.dart';
 
 class GroupChatPage extends StatefulWidget {
   final String groupId;
@@ -29,6 +30,8 @@ class _GroupChatPageState extends State<GroupChatPage> {
   final Map<String, Map<String, String>> _translationCache =
       {}; // messageId -> lang -> translation
   String preferredLang = 'en';
+  bool _isPinned = false;
+  Stream<DocumentSnapshot<Map<String, dynamic>>>? _userDocStream;
 
   Future<Map<String, dynamic>> _fetchUser(String uid) async {
     if (_userCache.containsKey(uid)) return _userCache[uid]!;
@@ -132,6 +135,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
   void initState() {
     super.initState();
     _loadPreferredLang();
+    _listenPinnedStatus();
   }
 
   Future<void> _loadPreferredLang() async {
@@ -143,7 +147,40 @@ class _GroupChatPageState extends State<GroupChatPage> {
       if (code != null && code.isNotEmpty) {
         setState(() => preferredLang = code);
       }
+      final pinnedList = List<String>.from(doc.data()?['pinnedGroups'] ?? []);
+      _isPinned = pinnedList.contains(widget.groupId);
     } catch (_) {}
+  }
+
+  void _listenPinnedStatus() {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+    _userDocStream = _firestore.collection('users').doc(uid).snapshots();
+    _userDocStream!.listen((doc) {
+      final pinnedList = List<String>.from(doc.data()?['pinnedGroups'] ?? []);
+      final pinned = pinnedList.contains(widget.groupId);
+      if (mounted && pinned != _isPinned) {
+        setState(() => _isPinned = pinned);
+      }
+    });
+  }
+
+  Future<void> _togglePin() async {
+    if (_isPinned) {
+      await GroupService.unpinGroup(widget.groupId);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Group unpinned')));
+      }
+    } else {
+      await GroupService.pinGroup(widget.groupId);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Group pinned')));
+      }
+    }
   }
 
   Future<void> _savePreferredLang(String code) async {
@@ -222,7 +259,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
       case 'fr':
         return TranslateLanguage.french;
       case 'si':
-        return TranslateLanguage.english; // fallback for Sinhala
+        return TranslateLanguage.english; 
       case 'en':
       default:
         return TranslateLanguage.english;
@@ -345,6 +382,14 @@ class _GroupChatPageState extends State<GroupChatPage> {
       appBar: AppBar(
         title: Text(widget.groupName),
         actions: [
+          IconButton(
+            tooltip: _isPinned ? 'Unpin Group' : 'Pin Group',
+            icon: Icon(
+              Icons.push_pin,
+              color: _isPinned ? Colors.orange : Colors.white70,
+            ),
+            onPressed: _togglePin,
+          ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: preferredLang,

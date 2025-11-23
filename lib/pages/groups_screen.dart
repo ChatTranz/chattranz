@@ -3,6 +3,7 @@ import 'package:chattranz/pages/create_group.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'group_chat_page.dart';
+import 'package:chattranz/services/group_service.dart';
 // Group info is displayed inline via a bottom sheet; no extra page import.
 
 class GroupsScreen extends StatefulWidget {
@@ -13,21 +14,6 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
-  Future<List<Map<String, dynamic>>> _fetchMembers(List<dynamic> ids) async {
-    if (ids.isEmpty) return [];
-    final cols = ids.map(
-      (id) => FirebaseFirestore.instance
-          .collection('users')
-          .doc(id as String)
-          .get(),
-    );
-    final docs = await Future.wait(cols);
-    return docs
-        .where((d) => d.exists)
-        .map((d) => {'id': d.id, 'data': d.data()})
-        .toList();
-  }
-
   void _showAddMemberDialog(BuildContext context, String groupId) {
     final controller = TextEditingController();
     showDialog<void>(
@@ -218,101 +204,166 @@ class _GroupsScreenState extends State<GroupsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Groups'), centerTitle: true),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: groupsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No groups yet. Create one!'));
-          }
+      body: StreamBuilder<Set<String>>(
+        // first listen to pinned groups
+        stream: GroupService.pinnedGroupsStream(),
+        builder: (context, pinnedSnap) {
+          final pinned = pinnedSnap.data ?? const <String>{};
+          return StreamBuilder<QuerySnapshot>(
+            stream: groupsStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('No groups yet. Create one!'));
+              }
 
-          // Sort client-side by createdAt desc to avoid requiring a composite index
-          final docs = snapshot.data!.docs.toList()
-            ..sort((a, b) {
-              final ad = a.data() as Map<String, dynamic>;
-              final bd = b.data() as Map<String, dynamic>;
-              final at =
-                  (ad['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
-              final bt =
-                  (bd['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ?? 0;
-              return bt.compareTo(at);
-            });
-          return ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: docs.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final d = docs[index];
-              final data = d.data() as Map<String, dynamic>;
-              final name = (data['name'] ?? 'Group').toString();
-              final members = List<dynamic>.from(data['members'] ?? []);
+              // Sort client-side by createdAt desc to avoid requiring a composite index
+              final allDocs = snapshot.data!.docs.toList()
+                ..sort((a, b) {
+                  final ad = a.data() as Map<String, dynamic>;
+                  final bd = b.data() as Map<String, dynamic>;
+                  final at =
+                      (ad['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ??
+                      0;
+                  final bt =
+                      (bd['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ??
+                      0;
+                  return bt.compareTo(at);
+                });
 
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => GroupChatPage(
-                        groupId: d.id,
-                        groupName: name,
-                        memberIds: members,
+              // Partition into pinned and unpinned
+              final pinnedDocs = <QueryDocumentSnapshot>[];
+              final unpinnedDocs = <QueryDocumentSnapshot>[];
+              for (final doc in allDocs) {
+                if (pinned.contains(doc.id)) {
+                  pinnedDocs.add(doc);
+                } else {
+                  unpinnedDocs.add(doc);
+                }
+              }
+              final ordered = [...pinnedDocs, ...unpinnedDocs];
+
+              return ListView.separated(
+                padding: const EdgeInsets.all(12),
+                itemCount: ordered.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final d = ordered[index];
+                  final data = d.data() as Map<String, dynamic>;
+                  final name = (data['name'] ?? 'Group').toString();
+                  final members = List<dynamic>.from(data['members'] ?? []);
+                  final isPinned = pinned.contains(d.id);
+
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => GroupChatPage(
+                            groupId: d.id,
+                            groupName: name,
+                            memberIds: members,
+                          ),
+                        ),
+                      ),
+                      leading: CircleAvatar(
+                        child: Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : 'G',
+                        ),
+                      ),
+                      title: Row(
+                        children: [
+                          if (isPinned) ...[
+                            const Icon(
+                              Icons.push_pin,
+                              size: 16,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Expanded(child: Text(name)),
+                        ],
+                      ),
+                      subtitle: Text('${members.length} members'),
+                      trailing: PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) async {
+                          switch (value) {
+                            case 'info':
+                              _showGroupInfoBottomSheet(
+                                context,
+                                groupName: name,
+                                members: members,
+                                createdAt: data['createdAt'] as Timestamp?,
+                              );
+                              break;
+                            case 'add':
+                              _showAddMemberDialog(context, d.id);
+                              break;
+                            case 'pin':
+                              if (isPinned) {
+                                await GroupService.unpinGroup(d.id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Group unpinned'),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                await GroupService.pinGroup(d.id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Group pinned'),
+                                    ),
+                                  );
+                                }
+                              }
+                              break;
+                            case 'exit':
+                              _showLeaveGroupDialog(context, d.id);
+                              break;
+                            case 'delete':
+                              _confirmDeleteGroup(context, d.id);
+                              break;
+                          }
+                        },
+                        itemBuilder: (ctx) => [
+                          const PopupMenuItem(
+                            value: 'info',
+                            child: Text('Group Info'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'add',
+                            child: Text('Add Members'),
+                          ),
+                          PopupMenuItem(
+                            value: 'pin',
+                            child: Text(isPinned ? 'Unpin Group' : 'Pin Group'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'exit',
+                            child: Text('Exit Group'),
+                          ),
+                          const PopupMenuDivider(),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text('Delete Group'),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  leading: CircleAvatar(
-                    child: Text(name.isNotEmpty ? name[0].toUpperCase() : 'G'),
-                  ),
-                  title: Text(name),
-                  subtitle: Text('${members.length} members'),
-                  trailing: PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert),
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'info':
-                          _showGroupInfoBottomSheet(
-                            context,
-                            groupName: name,
-                            members: members,
-                            createdAt: data['createdAt'] as Timestamp?,
-                          );
-                          break;
-                        case 'add':
-                          _showAddMemberDialog(context, d.id);
-                          break;
-                        case 'pin':
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Group pinned')),
-                          );
-                          break;
-                        case 'exit':
-                          _showLeaveGroupDialog(context, d.id);
-                          break;
-                        case 'delete':
-                          _confirmDeleteGroup(context, d.id);
-                          break;
-                      }
-                    },
-                    itemBuilder: (ctx) => const [
-                      PopupMenuItem(value: 'info', child: Text('Group Info')),
-                      PopupMenuItem(value: 'add', child: Text('Add Members')),
-                      PopupMenuItem(value: 'pin', child: Text('Pin Group')),
-                      PopupMenuItem(value: 'exit', child: Text('Exit Group')),
-                      PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Delete Group'),
-                      ),
-                    ],
-                  ),
-                ),
+                  );
+                },
               );
             },
           );
