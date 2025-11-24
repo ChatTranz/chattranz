@@ -42,6 +42,8 @@ dependencies:
   permission_handler: ^11.3.1
   google_mlkit_translation: ^0.9.0
   http: ^1.2.0
+  # Locked to 0.9.47 due to web compilation issues in 0.9.48+hotfix.1 (JSArray iteration).
+  flutter_webrtc: 0.9.47
 
 
   # The following adds the Cupertino Icons font to your application.

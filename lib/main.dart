@@ -43,7 +43,20 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
-        '/calling': (context) => const CallingScreen(),
+        '/calling': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is Map<String, dynamic> && args['callId'] != null) {
+            return CallingScreen(
+              callId: args['callId'] as String,
+              friendId: (args['friendId'] ?? '') as String,
+              friendName: (args['friendName'] ?? 'Unknown') as String,
+              friendPhotoUrl: args['friendPhotoUrl'] as String?,
+            );
+          }
+          return const Scaffold(
+            body: Center(child: Text('Missing call arguments')),
+          );
+        },
       },
     );
   }
