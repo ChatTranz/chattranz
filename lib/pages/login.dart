@@ -142,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           return;
                         }
 
+                        if (!mounted) return;
                         setState(() => _isLoading = true);
 
                         try {
@@ -151,7 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                           if (user != null) {
                             Fluttertoast.showToast(msg: "Login Successful!");
-                            Navigator.pushReplacement(
+                            if (!mounted)
+                              return; // stop if disposed before navigation
+                            await Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const MainNavigation(),
@@ -163,7 +166,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             msg: "Login failed: ${e.toString()}",
                           );
                         } finally {
-                          setState(() => _isLoading = false);
+                          if (mounted) {
+                            setState(() => _isLoading = false);
+                          }
                         }
                       },
 
@@ -174,14 +179,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: const StadiumBorder(),
                       ),
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              'Log In',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 24),

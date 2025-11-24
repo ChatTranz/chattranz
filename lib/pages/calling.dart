@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../services/call_service.dart';
+import '../services/voice_call_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CallingScreen extends StatefulWidget {
   final String callId;
@@ -24,6 +26,10 @@ class _CallingScreenState extends State<CallingScreen> {
   late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> _sub;
   String _status = 'calling';
   final _service = CallService();
+  final _voice = VoiceCallService();
+  VoiceCallControls? _controls;
+  bool _isCaller = false;
+  bool _audioStarted = false;
   Timer? _simulationTimer1;
   Timer? _simulationTimer2; // kept for backward-compat; not used to auto-answer
   bool _popped = false; // prevent double pop when remote ends/declines
@@ -44,6 +50,14 @@ class _CallingScreenState extends State<CallingScreen> {
           final data = doc.data();
           if (data != null) {
             final newStatus = data['status'] as String? ?? 'calling';
+            final callerId = data['callerId'] as String?;
+            // Determine role using FirebaseAuth directly (safer) if available.
+            try {
+              final authUser = FirebaseAuth.instance.currentUser;
+              if (authUser != null && callerId != null) {
+                _isCaller = authUser.uid == callerId;
+              }
+            } catch (_) {}
             if (mounted) setState(() => _status = newStatus);
             // Auto-close screen if remote declines or ends the call.
             if ((newStatus == 'declined' || newStatus == 'ended') && !_popped) {
@@ -51,6 +65,10 @@ class _CallingScreenState extends State<CallingScreen> {
               if (mounted && Navigator.canPop(context)) {
                 Navigator.pop(context);
               }
+            }
+            // Start caller audio once remote answers.
+            if (newStatus == 'answered' && _isCaller && !_audioStarted) {
+              _startCallerAudio();
             }
           }
         });
@@ -68,6 +86,7 @@ class _CallingScreenState extends State<CallingScreen> {
 
   Future<void> _end() async {
     await _service.endCall(widget.callId);
+    await _voice.dispose();
     if (mounted) Navigator.pop(context);
   }
 
@@ -76,6 +95,7 @@ class _CallingScreenState extends State<CallingScreen> {
     _sub.cancel();
     _simulationTimer1?.cancel();
     _simulationTimer2?.cancel();
+    _voice.dispose();
     super.dispose();
   }
 
@@ -169,7 +189,20 @@ class _CallingScreenState extends State<CallingScreen> {
                             widget.callId,
                             'answered',
                           );
+                          // Receiver starts audio immediately after answering.
+                          _startReceiverAudio();
                         }
+                      },
+                    ),
+                  if (_status == 'answered')
+                    _callButton(
+                      icon: _controls?.isMuted == true
+                          ? Icons.mic_off
+                          : Icons.mic,
+                      color: Colors.blueGrey,
+                      onPressed: () {
+                        _controls?.toggleMute();
+                        setState(() {});
                       },
                     ),
                 ],
@@ -195,6 +228,29 @@ class _CallingScreenState extends State<CallingScreen> {
         return 'Declined';
       default:
         return _status;
+    }
+  }
+
+  Future<void> _startCallerAudio() async {
+    try {
+      await _voice.startAsCaller(widget.callId);
+      _controls = VoiceCallControls(_voice);
+      _audioStarted = true;
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('Caller audio start failed: $e');
+    }
+  }
+
+  Future<void> _startReceiverAudio() async {
+    if (_audioStarted) return;
+    try {
+      await _voice.answerCall(widget.callId);
+      _controls = VoiceCallControls(_voice);
+      _audioStarted = true;
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('Receiver audio start failed: $e');
     }
   }
 }
