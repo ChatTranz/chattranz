@@ -125,10 +125,10 @@ packages:
     dependency: transitive
     description:
       name: dart_webrtc
-      sha256: "5897a3bdd6c7fded07e80e250260ca4c9cd61f9080911aa308b516e1206745a9"
+      sha256: "51bcda4ba5d7dd9e65a309244ce3ac0b58025e6e1f6d7442cee4cd02134ef65f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.6.0"
   fake_async:
     dependency: transitive
     description:
@@ -308,10 +308,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_webrtc
-      sha256: "577216727181cb13776a65d3e7cb33e783e740c5496335011aed4a038b28c3fe"
+      sha256: "71a38363a5b50603e405c275f30de2eb90f980b0cc94b0e1e9d8b9d6a6b03bf0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.47"
+    version: "1.2.1"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -428,10 +428,10 @@ packages:
     dependency: transitive
     description:
       name: js
-      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
+      sha256: "53385261521cc4a0c4658fd0ad07a7d14591cf8fc33abbceae306ddb974888dc"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.7"
+    version: "0.7.2"
   leak_tracker:
     dependency: transitive
     description:
@@ -464,6 +464,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: a7967e31b703831a893bbc3c3dd11db08126fe5f369b5c648a36f821979f5be3
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.2"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: c8245ada5f1717ed44271ed1c26b8ce85ca3228fd2ffdb75468ab01979309d61
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
   matcher:
     dependency: transitive
     description:
@@ -572,18 +588,18 @@ packages:
     dependency: "direct main"
     description:
       name: permission_handler
-      sha256: "59adad729136f01ea9e35a48f5d1395e25cba6cea552249ddbe9cf950f5d7849"
+      sha256: bc917da36261b00137bbc8896bf1482169cd76f866282368948f032c8c1caae1
       url: "https://pub.dev"
     source: hosted
-    version: "11.4.0"
+    version: "12.0.1"
   permission_handler_android:
     dependency: transitive
     description:
       name: permission_handler_android
-      sha256: d3971dcdd76182a0c198c096b5db2f0884b0d4196723d21a866fc4cdea057ebc
+      sha256: "1e3bc410ca1bf84662104b100eb126e066cb55791b7451307f9708d4007350e6"
       url: "https://pub.dev"
     source: hosted
-    version: "12.1.0"
+    version: "13.0.1"
   permission_handler_apple:
     dependency: transitive
     description:
@@ -624,14 +640,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
-  platform_detect:
-    dependency: transitive
-    description:
-      name: platform_detect
-      sha256: "7394dc1d884e652785a37c3ff25c54e503c6d9fa2f35b55d5efc0a133dec122c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.5"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -648,14 +656,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5+1"
-  pub_semver:
-    dependency: transitive
-    description:
-      name: pub_semver
-      sha256: "5bfcf68ca79ef689f8990d1160781b4bad40a3bd5e5218ad4076ddb7f4081585"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   rxdart:
     dependency: transitive
     description:
@@ -817,10 +817,10 @@ packages:
     dependency: transitive
     description:
       name: webrtc_interface
-      sha256: "2efbd3e4e5ebeb2914253bcc51dafd3053c4b87b43f3076c74835a9deecbae3a"
+      sha256: "2e604a31703ad26781782fb14fa8a4ee621154ee2c513d2b9938e486fa695233"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.3.0"
   xdg_directories:
     dependency: transitive
     description:
