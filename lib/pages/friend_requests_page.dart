@@ -18,14 +18,72 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       return const Scaffold(
-        body: Center(child: Text('Please log in.')),
+        backgroundColor: Color(0xFF1E1E1E),
+        body: Center(
+          child: Text(
+            'Please log in.',
+            style: TextStyle(color: Colors.white54, fontSize: 16),
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Friend Requests"),
-        backgroundColor: const Color(0xFF1976D2),
+      backgroundColor: const Color(0xFF1E1E1E),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.03),
+                offset: const Offset(0, -2),
+                blurRadius: 8,
+              ),
+              const BoxShadow(
+                color: Colors.black54,
+                offset: Offset(0, 4),
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.05),
+                    offset: const Offset(-2, -2),
+                    blurRadius: 6,
+                  ),
+                  const BoxShadow(
+                    color: Colors.black54,
+                    offset: Offset(2, 2),
+                    blurRadius: 6,
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            title: const Text(
+              "Friend Requests",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
@@ -35,18 +93,65 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF4757)),
+              ),
+            );
           }
 
           final requests = snapshot.data!.docs;
 
           if (requests.isEmpty) {
-            return const Center(
-              child: Text("No pending friend requests."),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(40),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.03),
+                          offset: const Offset(-6, -6),
+                          blurRadius: 12,
+                        ),
+                        const BoxShadow(
+                          color: Colors.black54,
+                          offset: Offset(6, 6),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.person_add_disabled,
+                      size: 80,
+                      color: Colors.white24,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "No pending friend requests",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "You're all caught up!",
+                    style: TextStyle(color: Colors.white38, fontSize: 14),
+                  ),
+                ],
+              ),
             );
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: requests.length,
             itemBuilder: (context, index) {
               final request = requests[index];
@@ -56,7 +161,34 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                 future: _firestore.collection('users').doc(senderId).get(),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) {
-                    return const ListTile(title: Text("Loading..."));
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E1E1E),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.05),
+                              offset: const Offset(-4, -4),
+                              blurRadius: 10,
+                            ),
+                            const BoxShadow(
+                              color: Colors.black54,
+                              offset: Offset(4, 4),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            "Loading...",
+                            style: TextStyle(color: Colors.white54),
+                          ),
+                        ),
+                      ),
+                    );
                   }
 
                   final userData =
@@ -64,39 +196,168 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                   final senderName = userData['name'] ?? 'Unknown';
                   final senderEmail = userData['email'] ?? '';
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    child: ListTile(
-                      leading: const CircleAvatar(
-                        backgroundColor: Color(0xFFBBDEFB),
-                        child: Icon(Icons.person, color: Colors.white),
-                      ),
-                      title: Text(senderName),
-                      subtitle: Text(senderEmail),
-                      trailing: Wrap(
-                        spacing: 8,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              await _acceptRequest(
-                                  request.id, senderId, currentUser.uid);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            child: const Text("Accept"),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.05),
+                            offset: const Offset(-4, -4),
+                            blurRadius: 10,
                           ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              await _rejectRequest(request.id);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            child: const Text("Reject"),
+                          const BoxShadow(
+                            color: Colors.black54,
+                            offset: Offset(4, 4),
+                            blurRadius: 10,
                           ),
                         ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1E1E1E),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(0.05),
+                                        offset: const Offset(-3, -3),
+                                        blurRadius: 6,
+                                      ),
+                                      const BoxShadow(
+                                        color: Colors.black54,
+                                        offset: Offset(3, 3),
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.person,
+                                    color: Color(0xFFFF4757),
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        senderName,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        senderEmail,
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF4CAF50).withOpacity(0.5),
+                                          offset: const Offset(0, 4),
+                                          blurRadius: 12,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () async {
+                                          await _acceptRequest(
+                                              request.id, senderId, currentUser.uid);
+                                        },
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: const Center(
+                                          child: Text(
+                                            "Accept",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Container(
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFFFF4757).withOpacity(0.5),
+                                          offset: const Offset(0, 4),
+                                          blurRadius: 12,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () async {
+                                          await _rejectRequest(request.id);
+                                        },
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: const Center(
+                                          child: Text(
+                                            "Reject",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
