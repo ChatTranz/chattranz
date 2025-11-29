@@ -34,25 +34,28 @@ class _StatusScreenState extends State<StatusScreen> {
           ),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('statuses')
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          // Delete expired statuses
-          _deleteExpiredStatuses();
+      body: Column(
+        children: [
+          // Always show My Status section at top
+          _buildMyStatusSection(currentUser.uid),
+          const Divider(height: 1),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('statuses')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                // Delete expired statuses
+                _deleteExpiredStatuses();
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Column(
-              children: [
-                _buildMyStatusSection(currentUser.uid),
-                Expanded(
-                  child: Center(
+                final statuses = snapshot.data?.docs ?? [];
+                if (statuses.isEmpty) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -71,79 +74,88 @@ class _StatusScreenState extends State<StatusScreen> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            );
-          }
+                  );
+                }
 
-          final statuses = snapshot.data!.docs;
+                // Filter out expired statuses and own statuses
+                final now = DateTime.now();
+                final filteredStatuses = statuses.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final userId = data['userId'] as String? ?? '';
+                  final timestamp = data['timestamp'] as Timestamp?;
+                  if (userId == currentUser.uid) return false;
+                  if (timestamp == null) return false;
+                  final statusTime = timestamp.toDate();
+                  return now.difference(statusTime).inHours < 24;
+                }).toList();
 
-          // Filter out expired statuses and own statuses
-          final now = DateTime.now();
-          final filteredStatuses = statuses.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final userId = data['userId'] as String? ?? '';
-            final timestamp = data['timestamp'] as Timestamp?;
+                if (filteredStatuses.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No recent statuses from friends',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  );
+                }
 
-            if (userId == currentUser.uid) return false;
-            if (timestamp == null) return false;
+                return ListView.builder(
+                  itemCount: filteredStatuses.length,
+                  itemBuilder: (context, index) {
+                    final statusDoc = filteredStatuses[index];
+                    final data = statusDoc.data() as Map<String, dynamic>;
+                    final userName = data['userName'] as String? ?? 'Unknown';
+                    final statusText = data['statusText'] as String? ?? '';
+                    final timestamp = data['timestamp'] as Timestamp?;
+                    final photoUrl = data['photoUrl'] as String?;
 
-            final statusTime = timestamp.toDate();
-            final difference = now.difference(statusTime);
-            return difference.inHours < 24;
-          }).toList();
-
-          return ListView.builder(
-            itemCount: filteredStatuses.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                // My Status section
-                return _buildMyStatusSection(currentUser.uid);
-              }
-
-              final statusDoc = filteredStatuses[index - 1];
-              final data = statusDoc.data() as Map<String, dynamic>;
-              final userName = data['userName'] as String? ?? 'Unknown';
-              final statusText = data['statusText'] as String? ?? '';
-              final timestamp = data['timestamp'] as Timestamp?;
-              final photoUrl = data['photoUrl'] as String?;
-
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: const Color(0xFF00BCD4),
-                  backgroundImage: photoUrl != null
-                      ? NetworkImage(photoUrl)
-                      : null,
-                  child: photoUrl == null
-                      ? Text(
-                          userName.isNotEmpty ? userName[0].toUpperCase() : '?',
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      : null,
-                ),
-                title: Text(
-                  userName,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  statusText,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: timestamp != null
-                    ? Text(
-                        _formatTimestamp(timestamp),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      )
-                    : null,
-                onTap: () {
-                  _showStatusDetail(userName, statusText, photoUrl, timestamp);
-                },
-              );
-            },
-          );
-        },
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: const Color(0xFF00BCD4),
+                        backgroundImage: photoUrl != null
+                            ? NetworkImage(photoUrl)
+                            : null,
+                        child: photoUrl == null
+                            ? Text(
+                                userName.isNotEmpty
+                                    ? userName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(color: Colors.white),
+                              )
+                            : null,
+                      ),
+                      title: Text(
+                        userName,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        statusText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: timestamp != null
+                          ? Text(
+                              _formatTimestamp(timestamp),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            )
+                          : null,
+                      onTap: () {
+                        _showStatusDetail(
+                          userName,
+                          statusText,
+                          photoUrl,
+                          timestamp,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF00BCD4),
@@ -153,76 +165,18 @@ class _StatusScreenState extends State<StatusScreen> {
     );
   }
 
-  // Simple fallback UI if My Status query errors
-  Widget _buildMyStatusFallback(String currentUserId) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'My Status',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
-          ),
-        ),
-        ListTile(
-          leading: StreamBuilder<DocumentSnapshot>(
-            stream: _firestore
-                .collection('users')
-                .doc(currentUserId)
-                .snapshots(),
-            builder: (context, userSnapshot) {
-              final userData =
-                  userSnapshot.data?.data() as Map<String, dynamic>?;
-              final photoUrl = userData?['photoUrl'] as String?;
-              return CircleAvatar(
-                radius: 24,
-                backgroundColor: const Color(0xFF00BCD4),
-                backgroundImage: photoUrl != null
-                    ? NetworkImage(photoUrl)
-                    : null,
-                child: photoUrl == null
-                    ? const Icon(Icons.person, color: Colors.white)
-                    : null,
-              );
-            },
-          ),
-          title: const Text(
-            'My Status',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          subtitle: Text(
-            'Tap to add status update',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-          onTap: () => _showAddStatusDialog(null, null),
-        ),
-        const Divider(),
-      ],
-    );
-  }
-
-  Widget _buildMyStatusSection(String currentUserId) {
+  Widget _buildMyStatusSection(String uid) {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
           .collection('statuses')
-          .where('userId', isEqualTo: currentUserId)
-          // Avoid Firestore composite index requirement; sort client-side
+          .where('userId', isEqualTo: uid)
           .snapshots(),
       builder: (context, snapshot) {
-        // Delete expired statuses (older than 24 hours)
+        // Delete expired statuses in background
         _deleteExpiredStatuses();
 
-        if (snapshot.hasError) {
-          // Fall back to showing the add UI if query errors
-          return _buildMyStatusFallback(currentUserId);
-        }
-
         final allDocs = snapshot.data?.docs ?? [];
+
         // Filter to last 24h and sort by timestamp desc
         final now = DateTime.now();
         final myStatuses =
@@ -240,7 +194,6 @@ class _StatusScreenState extends State<StatusScreen> {
               final mb = tb?.millisecondsSinceEpoch ?? 0;
               return mb.compareTo(ma);
             });
-        final hasStatus = myStatuses.isNotEmpty;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,72 +209,38 @@ class _StatusScreenState extends State<StatusScreen> {
                 ),
               ),
             ),
-            // Main profile with add button
-            ListTile(
-              leading: StreamBuilder<DocumentSnapshot>(
-                stream: _firestore
-                    .collection('users')
-                    .doc(currentUserId)
-                    .snapshots(),
-                builder: (context, userSnapshot) {
-                  final userData =
-                      userSnapshot.data?.data() as Map<String, dynamic>?;
-                  final photoUrl = userData?['photoUrl'] as String?;
-
-                  return Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: const Color(0xFF00BCD4),
-                        backgroundImage: photoUrl != null
-                            ? NetworkImage(photoUrl)
-                            : null,
-                        child: photoUrl == null
-                            ? const Icon(Icons.person, color: Colors.white)
-                            : null,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00BCD4),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              title: const Text(
-                'My Status',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                hasStatus
-                    ? 'Tap to view or add new status'
-                    : 'Tap to add status update',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              onTap: () => _showAddStatusDialog(null, null),
-            ),
-            // Horizontal list of status circles
-            if (hasStatus)
+            if (myStatuses.isEmpty)
+              ListTile(
+                leading: StreamBuilder<DocumentSnapshot>(
+                  stream: _firestore.collection('users').doc(uid).snapshots(),
+                  builder: (context, userSnapshot) {
+                    final userData =
+                        userSnapshot.data?.data() as Map<String, dynamic>?;
+                    final photoUrl = userData?['photoUrl'] as String?;
+                    return CircleAvatar(
+                      backgroundColor: const Color(0xFF00BCD4),
+                      backgroundImage: photoUrl != null
+                          ? NetworkImage(photoUrl)
+                          : null,
+                      child: photoUrl == null
+                          ? const Icon(Icons.person, color: Colors.white)
+                          : null,
+                    );
+                  },
+                ),
+                title: const Text(
+                  'My Status',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: const Text('Tap to add status update'),
+                onTap: () => _showAddStatusDialog(null, null),
+              )
+            else
               Container(
-                height: 100,
-                margin: const EdgeInsets.symmetric(vertical: 8),
+                height: 120,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore
-                      .collection('users')
-                      .doc(currentUserId)
-                      .snapshots(),
+                  stream: _firestore.collection('users').doc(uid).snapshots(),
                   builder: (context, userSnapshot) {
                     final userData =
                         userSnapshot.data?.data() as Map<String, dynamic>?;
@@ -329,7 +248,6 @@ class _StatusScreenState extends State<StatusScreen> {
 
                     return ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: myStatuses.length,
                       itemBuilder: (context, index) {
                         final statusDoc = myStatuses[index];
@@ -350,31 +268,57 @@ class _StatusScreenState extends State<StatusScreen> {
                             margin: const EdgeInsets.only(right: 12),
                             child: Column(
                               children: [
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: const Color(0xFF00BCD4),
-                                      width: 3,
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width: 70,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: const Color(0xFF00BCD4),
+                                          width: 3,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(3),
+                                        child: CircleAvatar(
+                                          backgroundColor: Colors.grey[300],
+                                          backgroundImage: photoUrl != null
+                                              ? NetworkImage(photoUrl)
+                                              : null,
+                                          child: photoUrl == null
+                                              ? const Icon(
+                                                  Icons.person,
+                                                  color: Colors.white,
+                                                )
+                                              : null,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(3),
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.grey[300],
-                                      backgroundImage: photoUrl != null
-                                          ? NetworkImage(photoUrl)
-                                          : null,
-                                      child: photoUrl == null
-                                          ? const Icon(
-                                              Icons.person,
-                                              color: Colors.white,
-                                            )
-                                          : null,
+                                    Positioned(
+                                      right: 0,
+                                      top: 0,
+                                      child: InkWell(
+                                        onTap: () => _showStatusOptionsMenu(
+                                          statusDoc.id,
+                                          statusText,
+                                        ),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: const EdgeInsets.all(4),
+                                          child: const Icon(
+                                            Icons.more_vert,
+                                            color: Colors.white,
+                                            size: 14,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -389,6 +333,16 @@ class _StatusScreenState extends State<StatusScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
                                 ),
+                                Text(
+                                  statusText,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[800],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
                               ],
                             ),
                           ),
@@ -398,21 +352,6 @@ class _StatusScreenState extends State<StatusScreen> {
                   },
                 ),
               ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: Text(
-                'Recent Updates',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ),
           ],
         );
       },
