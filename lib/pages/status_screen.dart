@@ -53,28 +53,34 @@ class _StatusScreenState extends State<StatusScreen> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
-                  .collection('statuses')
-                  .orderBy('timestamp', descending: true)
+                  .collection('friends')
+                  .doc(currentUser.uid)
+                  .collection('userFriends')
                   .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+              builder: (context, friendsSnapshot) {
+                if (friendsSnapshot.connectionState ==
+                    ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final statuses = snapshot.data?.docs ?? [];
-                if (statuses.isEmpty) {
+                // Get list of friend IDs
+                final friendIds =
+                    friendsSnapshot.data?.docs.map((doc) => doc.id).toSet() ??
+                    <String>{};
+
+                if (friendIds.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.circle_outlined,
+                          Icons.people_outline,
                           size: 100,
                           color: Colors.grey[400],
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No status updates from friends yet',
+                          'Add friends to see their status updates',
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.grey[600],
@@ -85,189 +91,224 @@ class _StatusScreenState extends State<StatusScreen> {
                   );
                 }
 
-                // Filter out expired statuses and own statuses
-                final now = DateTime.now();
-                final filteredStatuses = statuses.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final userId = data['userId'] as String? ?? '';
-                  final timestamp = data['timestamp'] as Timestamp?;
-                  if (userId == currentUser.uid) return false;
-                  if (timestamp == null) return false;
-                  final statusTime = timestamp.toDate();
-                  return now.difference(statusTime).inHours < 24;
-                }).toList();
+                return StreamBuilder<QuerySnapshot>(
+                  stream: _firestore
+                      .collection('statuses')
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                if (filteredStatuses.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No recent statuses from friends',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  );
-                }
+                    final statuses = snapshot.data?.docs ?? [];
 
-                // Group statuses by user
-                final Map<String, List<QueryDocumentSnapshot>> groupedByUser =
-                    {};
-                for (var doc in filteredStatuses) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final userId = data['userId'] as String? ?? '';
-                  if (!groupedByUser.containsKey(userId)) {
-                    groupedByUser[userId] = [];
-                  }
-                  groupedByUser[userId]!.add(doc);
-                }
+                    // Filter: only friends' statuses, not expired, not own
+                    final now = DateTime.now();
+                    final filteredStatuses = statuses.where((doc) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final userId = data['userId'] as String? ?? '';
+                      final timestamp = data['timestamp'] as Timestamp?;
 
-                // Sort each user's statuses by timestamp desc
-                groupedByUser.forEach((userId, statusList) {
-                  statusList.sort((a, b) {
-                    final ta =
-                        (a.data() as Map<String, dynamic>)['timestamp']
-                            as Timestamp?;
-                    final tb =
-                        (b.data() as Map<String, dynamic>)['timestamp']
-                            as Timestamp?;
-                    final ma = ta?.millisecondsSinceEpoch ?? 0;
-                    final mb = tb?.millisecondsSinceEpoch ?? 0;
-                    return mb.compareTo(ma);
-                  });
-                });
+                      // Must be a friend's status
+                      if (!friendIds.contains(userId)) return false;
+                      // Must have valid timestamp
+                      if (timestamp == null) return false;
+                      // Must be within 24 hours
+                      final statusTime = timestamp.toDate();
+                      return now.difference(statusTime).inHours < 24;
+                    }).toList();
 
-                final userIds = groupedByUser.keys.toList();
-
-                return ListView.builder(
-                  itemCount: userIds.length,
-                  itemBuilder: (context, index) {
-                    final userId = userIds[index];
-                    final userStatuses = groupedByUser[userId]!;
-                    final firstStatus =
-                        userStatuses.first.data() as Map<String, dynamic>;
-                    final userName =
-                        firstStatus['userName'] as String? ?? 'Unknown';
-                    final photoUrl = firstStatus['photoUrl'] as String?;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: const Color(0xFF00BCD4),
-                                backgroundImage: photoUrl != null
-                                    ? NetworkImage(photoUrl)
-                                    : null,
-                                child: photoUrl == null
-                                    ? Text(
-                                        userName.isNotEmpty
-                                            ? userName[0].toUpperCase()
-                                            : '?',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : null,
+                    if (filteredStatuses.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.circle_outlined,
+                              size: 100,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No recent statuses from friends',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
                               ),
-                              const SizedBox(width: 12),
-                              Text(
-                                userName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Container(
-                          height: 120,
-                          padding: const EdgeInsets.only(left: 16),
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: userStatuses.length,
-                            itemBuilder: (context, statusIndex) {
-                              final statusDoc = userStatuses[statusIndex];
-                              final data =
-                                  statusDoc.data() as Map<String, dynamic>;
-                              final statusText =
-                                  data['statusText'] as String? ?? '';
-                              final timestamp = data['timestamp'] as Timestamp?;
+                      );
+                    }
 
-                              return GestureDetector(
-                                onTap: () => _showStatusDetail(
-                                  userName,
-                                  statusText,
-                                  photoUrl,
-                                  timestamp,
-                                ),
-                                child: Container(
-                                  width: 80,
-                                  margin: const EdgeInsets.only(right: 12),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 70,
-                                        height: 70,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: const Color(0xFF00BCD4),
-                                            width: 3,
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(3),
-                                          child: CircleAvatar(
-                                            backgroundColor: Colors.grey[300],
-                                            backgroundImage: photoUrl != null
-                                                ? NetworkImage(photoUrl)
-                                                : null,
-                                            child: photoUrl == null
-                                                ? const Icon(
-                                                    Icons.person,
-                                                    color: Colors.white,
-                                                  )
-                                                : null,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        timestamp != null
-                                            ? _formatTimestamp(timestamp)
-                                            : '',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.grey[600],
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      Text(
-                                        statusText,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey[800],
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
+                    // Group statuses by user
+                    final Map<String, List<QueryDocumentSnapshot>>
+                    groupedByUser = {};
+                    for (var doc in filteredStatuses) {
+                      final data = doc.data() as Map<String, dynamic>;
+                      final userId = data['userId'] as String? ?? '';
+                      if (!groupedByUser.containsKey(userId)) {
+                        groupedByUser[userId] = [];
+                      }
+                      groupedByUser[userId]!.add(doc);
+                    }
+
+                    // Sort each user's statuses by timestamp desc
+                    groupedByUser.forEach((userId, statusList) {
+                      statusList.sort((a, b) {
+                        final ta =
+                            (a.data() as Map<String, dynamic>)['timestamp']
+                                as Timestamp?;
+                        final tb =
+                            (b.data() as Map<String, dynamic>)['timestamp']
+                                as Timestamp?;
+                        final ma = ta?.millisecondsSinceEpoch ?? 0;
+                        final mb = tb?.millisecondsSinceEpoch ?? 0;
+                        return mb.compareTo(ma);
+                      });
+                    });
+
+                    final userIds = groupedByUser.keys.toList();
+
+                    return ListView.builder(
+                      itemCount: userIds.length,
+                      itemBuilder: (context, index) {
+                        final userId = userIds[index];
+                        final userStatuses = groupedByUser[userId]!;
+                        final firstStatus =
+                            userStatuses.first.data() as Map<String, dynamic>;
+                        final userName =
+                            firstStatus['userName'] as String? ?? 'Unknown';
+                        final photoUrl = firstStatus['photoUrl'] as String?;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: const Color(0xFF00BCD4),
+                                    backgroundImage: photoUrl != null
+                                        ? NetworkImage(photoUrl)
+                                        : null,
+                                    child: photoUrl == null
+                                        ? Text(
+                                            userName.isNotEmpty
+                                                ? userName[0].toUpperCase()
+                                                : '?',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : null,
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const Divider(height: 1),
-                      ],
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    userName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              height: 120,
+                              padding: const EdgeInsets.only(left: 16),
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: userStatuses.length,
+                                itemBuilder: (context, statusIndex) {
+                                  final statusDoc = userStatuses[statusIndex];
+                                  final data =
+                                      statusDoc.data() as Map<String, dynamic>;
+                                  final statusText =
+                                      data['statusText'] as String? ?? '';
+                                  final timestamp =
+                                      data['timestamp'] as Timestamp?;
+
+                                  return GestureDetector(
+                                    onTap: () => _showStatusDetail(
+                                      userName,
+                                      statusText,
+                                      photoUrl,
+                                      timestamp,
+                                    ),
+                                    child: Container(
+                                      width: 80,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            width: 70,
+                                            height: 70,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: const Color(0xFF00BCD4),
+                                                width: 3,
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(3),
+                                              child: CircleAvatar(
+                                                backgroundColor:
+                                                    Colors.grey[300],
+                                                backgroundImage:
+                                                    photoUrl != null
+                                                    ? NetworkImage(photoUrl)
+                                                    : null,
+                                                child: photoUrl == null
+                                                    ? const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white,
+                                                      )
+                                                    : null,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            timestamp != null
+                                                ? _formatTimestamp(timestamp)
+                                                : '',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.grey[600],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          Text(
+                                            statusText,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[800],
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const Divider(height: 1),
+                          ],
+                        );
+                      },
                     );
                   },
                 );
