@@ -39,6 +39,17 @@ class _StatusScreenState extends State<StatusScreen> {
           // Always show My Status section at top
           _buildMyStatusSection(currentUser.uid),
           const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Recent Updates',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
@@ -46,9 +57,6 @@ class _StatusScreenState extends State<StatusScreen> {
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                // Delete expired statuses
-                _deleteExpiredStatuses();
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -98,57 +106,168 @@ class _StatusScreenState extends State<StatusScreen> {
                   );
                 }
 
-                return ListView.builder(
-                  itemCount: filteredStatuses.length,
-                  itemBuilder: (context, index) {
-                    final statusDoc = filteredStatuses[index];
-                    final data = statusDoc.data() as Map<String, dynamic>;
-                    final userName = data['userName'] as String? ?? 'Unknown';
-                    final statusText = data['statusText'] as String? ?? '';
-                    final timestamp = data['timestamp'] as Timestamp?;
-                    final photoUrl = data['photoUrl'] as String?;
+                // Group statuses by user
+                final Map<String, List<QueryDocumentSnapshot>> groupedByUser =
+                    {};
+                for (var doc in filteredStatuses) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final userId = data['userId'] as String? ?? '';
+                  if (!groupedByUser.containsKey(userId)) {
+                    groupedByUser[userId] = [];
+                  }
+                  groupedByUser[userId]!.add(doc);
+                }
 
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: const Color(0xFF00BCD4),
-                        backgroundImage: photoUrl != null
-                            ? NetworkImage(photoUrl)
-                            : null,
-                        child: photoUrl == null
-                            ? Text(
-                                userName.isNotEmpty
-                                    ? userName[0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(color: Colors.white),
-                              )
-                            : null,
-                      ),
-                      title: Text(
-                        userName,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(
-                        statusText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: timestamp != null
-                          ? Text(
-                              _formatTimestamp(timestamp),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                // Sort each user's statuses by timestamp desc
+                groupedByUser.forEach((userId, statusList) {
+                  statusList.sort((a, b) {
+                    final ta =
+                        (a.data() as Map<String, dynamic>)['timestamp']
+                            as Timestamp?;
+                    final tb =
+                        (b.data() as Map<String, dynamic>)['timestamp']
+                            as Timestamp?;
+                    final ma = ta?.millisecondsSinceEpoch ?? 0;
+                    final mb = tb?.millisecondsSinceEpoch ?? 0;
+                    return mb.compareTo(ma);
+                  });
+                });
+
+                final userIds = groupedByUser.keys.toList();
+
+                return ListView.builder(
+                  itemCount: userIds.length,
+                  itemBuilder: (context, index) {
+                    final userId = userIds[index];
+                    final userStatuses = groupedByUser[userId]!;
+                    final firstStatus =
+                        userStatuses.first.data() as Map<String, dynamic>;
+                    final userName =
+                        firstStatus['userName'] as String? ?? 'Unknown';
+                    final photoUrl = firstStatus['photoUrl'] as String?;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundColor: const Color(0xFF00BCD4),
+                                backgroundImage: photoUrl != null
+                                    ? NetworkImage(photoUrl)
+                                    : null,
+                                child: photoUrl == null
+                                    ? Text(
+                                        userName.isNotEmpty
+                                            ? userName[0].toUpperCase()
+                                            : '?',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : null,
                               ),
-                            )
-                          : null,
-                      onTap: () {
-                        _showStatusDetail(
-                          userName,
-                          statusText,
-                          photoUrl,
-                          timestamp,
-                        );
-                      },
+                              const SizedBox(width: 12),
+                              Text(
+                                userName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 120,
+                          padding: const EdgeInsets.only(left: 16),
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: userStatuses.length,
+                            itemBuilder: (context, statusIndex) {
+                              final statusDoc = userStatuses[statusIndex];
+                              final data =
+                                  statusDoc.data() as Map<String, dynamic>;
+                              final statusText =
+                                  data['statusText'] as String? ?? '';
+                              final timestamp = data['timestamp'] as Timestamp?;
+
+                              return GestureDetector(
+                                onTap: () => _showStatusDetail(
+                                  userName,
+                                  statusText,
+                                  photoUrl,
+                                  timestamp,
+                                ),
+                                child: Container(
+                                  width: 80,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 70,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFF00BCD4),
+                                            width: 3,
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(3),
+                                          child: CircleAvatar(
+                                            backgroundColor: Colors.grey[300],
+                                            backgroundImage: photoUrl != null
+                                                ? NetworkImage(photoUrl)
+                                                : null,
+                                            child: photoUrl == null
+                                                ? const Icon(
+                                                    Icons.person,
+                                                    color: Colors.white,
+                                                  )
+                                                : null,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        timestamp != null
+                                            ? _formatTimestamp(timestamp)
+                                            : '',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        statusText,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[800],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const Divider(height: 1),
+                      ],
                     );
                   },
                 );
