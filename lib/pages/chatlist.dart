@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'friend_requests_page.dart';
-import 'conversation.dart'; 
+import 'conversation.dart';
+import 'profile_screen.dart'; 
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
@@ -69,6 +70,12 @@ class _ChatListPageState extends State<ChatListPage> {
                   const SnackBar(content: Text('Group creation coming soon')),
                 );
               }
+              if (value == 'profile') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              }
             },
             itemBuilder: (context) => const [
               PopupMenuItem(value: 'add_friend', child: Text('Add Friend')),
@@ -77,6 +84,7 @@ class _ChatListPageState extends State<ChatListPage> {
                 child: Text('Friend Requests'),
               ),
               PopupMenuItem(value: 'create_group', child: Text('Create Group')),
+              PopupMenuItem(value: 'profile', child: Text('Profile')),
             ],
           ),
         ],
