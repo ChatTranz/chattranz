@@ -4,7 +4,7 @@ import 'chatlist.dart';
 import 'groups_screen.dart';
 import 'calls_screen.dart';
 import 'calling.dart';
-import 'profile_screen.dart';
+import 'status_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/call_service.dart';
 
@@ -23,7 +23,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const ChatListPage(), // your current chat list (Home)
     const GroupsScreen(),
     const CallsScreen(),
-    const ProfileScreen(),
+    const StatusScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -100,8 +100,8 @@ class _MainNavigationState extends State<MainNavigation> {
               BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Groups'),
               BottomNavigationBarItem(icon: Icon(Icons.call), label: 'Calls'),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
+                icon: Icon(Icons.circle_outlined),
+                label: 'Status',
               ),
             ],
           ),
