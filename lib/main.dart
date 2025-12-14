@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'pages/register_page.dart';
 import 'pages/register_next_page.dart';
 import 'pages/login.dart';
+import 'pages/chatlist.dart';
+import 'pages/splash_screen.dart';
 import 'auth/auth_gate.dart';
 
 void main() async {
@@ -22,11 +24,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const AuthGate(),
+      home: const SplashScreen(),
       routes: {
+        '/auth': (context) => const AuthGate(),
         '/register': (context) => const SignUpScreen(),
         '/register-next': (context) => const SignUpNextScreen(),
         '/login': (context) => const LoginScreen(),
+        '/chatlist': (context) => const ChatListPage(),
         '/conversation': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           if (args is Map<String, dynamic> &&
