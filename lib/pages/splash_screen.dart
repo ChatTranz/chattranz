@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:ui' show lerpDouble;
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -81,14 +82,27 @@ class AnimatedLoadingLogo extends StatefulWidget {
 class _AnimatedLoadingLogoState extends State<AnimatedLoadingLogo>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1700),
       vsync: this,
     )..repeat();
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.92, end: 1.02), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.02, end: 0.96), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 0.96, end: 0.92), weight: 25),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _glowAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+    );
   }
 
   @override
@@ -110,68 +124,58 @@ class _AnimatedLoadingLogoState extends State<AnimatedLoadingLogo>
             builder: (context, child) {
               return CustomPaint(
                 size: Size(widget.size, widget.size),
-                painter: CircularProgressPainter(
+                painter: PulseRingPainter(
                   progress: _controller.value,
-                  strokeWidth: 4,
-                  backgroundColor: Colors.grey.withOpacity(0.3),
-                  progressColor: const Color(0xFF0A66C2),
+                  baseColor: const Color(0xFF0A66C2),
+                  intensity: _glowAnimation.value,
                 ),
               );
             },
           ),
-          widget.logoWidget,
+          ScaleTransition(scale: _scaleAnimation, child: widget.logoWidget),
         ],
       ),
     );
   }
 }
 
-class CircularProgressPainter extends CustomPainter {
+class PulseRingPainter extends CustomPainter {
   final double progress;
-  final double strokeWidth;
-  final Color backgroundColor;
-  final Color progressColor;
+  final Color baseColor;
+  final double intensity;
 
-  CircularProgressPainter({
+  PulseRingPainter({
     required this.progress,
-    required this.strokeWidth,
-    required this.backgroundColor,
-    required this.progressColor,
+    required this.baseColor,
+    required this.intensity,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
+    final maxRadius = size.width / 2;
 
-    final backgroundPaint = Paint()
-      ..color = backgroundColor
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    for (var ring = 0; ring < 2; ring++) {
+      final phase = (progress + ring * 0.5) % 1.0;
+      final radius = lerpDouble(maxRadius * 0.7, maxRadius * 1.2, phase)!;
+      final alpha = lerpDouble(
+        0.0,
+        0.5,
+        (1.0 - phase) * intensity,
+      )!.clamp(0.0, 0.45);
 
-    canvas.drawCircle(center, radius, backgroundPaint);
+      final paint = Paint()
+        ..color = baseColor.withOpacity(alpha)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = lerpDouble(2, 6, 1.0 - phase)!;
 
-    final progressPaint = Paint()
-      ..color = progressColor
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    const startAngle = -90 * 3.14159 / 180;
-    final sweepAngle = 2 * 3.14159 * progress;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
+      canvas.drawCircle(center, radius, paint);
+    }
   }
 
   @override
-  bool shouldRepaint(CircularProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+  bool shouldRepaint(PulseRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.intensity != intensity;
   }
 }
