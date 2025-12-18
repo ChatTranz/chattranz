@@ -137,12 +137,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }, SetOptions(merge: true));
     }
     await FirebaseAuth.instance.signOut();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Color(0xFF252525),
-        content: Text('Logged out', style: TextStyle(color: Colors.white)),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFF252525),
+          content: Text('Logged out', style: TextStyle(color: Colors.white)),
+        ),
+      );
+      // Navigate back to root and clear all routes, auth gate will handle showing login
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushReplacementNamed('/');
+    }
   }
 
   void _openAvatarPicker() {
