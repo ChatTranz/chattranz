@@ -22,23 +22,36 @@ class _StatusScreenState extends State<StatusScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1E),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E1E),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds),
-          child: const Text(
-            'Status',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.03),
+                offset: const Offset(0, -2),
+                blurRadius: 8,
+              ),
+              const BoxShadow(
+                color: Colors.black54,
+                offset: Offset(0, 4),
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: const Text(
+              'Status',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
@@ -133,17 +146,47 @@ class _StatusScreenState extends State<StatusScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.circle_outlined,
-                              size: 100,
-                              color: Colors.white.withOpacity(0.2),
+                            Container(
+                              padding: const EdgeInsets.all(40),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E1E1E),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.03),
+                                    offset: const Offset(-6, -6),
+                                    blurRadius: 12,
+                                  ),
+                                  const BoxShadow(
+                                    color: Colors.black54,
+                                    offset: Offset(6, 6),
+                                    blurRadius: 12,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.auto_stories_outlined,
+                                size: 80,
+                                color: Colors.white24,
+                              ),
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No recent statuses from friends',
+                            const SizedBox(height: 24),
+                            const Text(
+                              'No status updates',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white.withOpacity(0.4),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white70,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Check back later for updates',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white38,
                               ),
                             ),
                           ],
@@ -181,6 +224,7 @@ class _StatusScreenState extends State<StatusScreen> {
                     final userIds = groupedByUser.keys.toList();
 
                     return ListView.builder(
+                      padding: const EdgeInsets.all(16),
                       itemCount: userIds.length,
                       itemBuilder: (context, index) {
                         final userId = userIds[index];
@@ -190,145 +234,112 @@ class _StatusScreenState extends State<StatusScreen> {
                         final userName =
                             firstStatus['userName'] as String? ?? 'Unknown';
                         final photoUrl = firstStatus['photoUrl'] as String?;
+                        final latestStatus =
+                            userStatuses.first.data() as Map<String, dynamic>;
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFFFF4757),
-                                          Color(0xFFFF6B7A),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: Colors.transparent,
-                                      backgroundImage: photoUrl != null
-                                          ? NetworkImage(photoUrl)
-                                          : null,
-                                      child: photoUrl == null
-                                          ? Text(
-                                              userName.isNotEmpty
-                                                  ? userName[0].toUpperCase()
-                                                  : '?',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    userName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E1E1E),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.05),
+                                  offset: const Offset(-4, -4),
+                                  blurRadius: 10,
+                                ),
+                                const BoxShadow(
+                                  color: Colors.black54,
+                                  offset: Offset(4, 4),
+                                  blurRadius: 10,
+                                ),
+                              ],
                             ),
-                            Container(
-                              height: 120,
-                              padding: const EdgeInsets.only(left: 16),
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: userStatuses.length,
-                                itemBuilder: (context, statusIndex) {
-                                  final statusDoc = userStatuses[statusIndex];
-                                  final data =
-                                      statusDoc.data() as Map<String, dynamic>;
-                                  final statusText =
-                                      data['statusText'] as String? ?? '';
-                                  final timestamp =
-                                      data['timestamp'] as Timestamp?;
-
-                                  return GestureDetector(
-                                    onTap: () => _showStatusDetail(
-                                      userName,
-                                      statusText,
-                                      photoUrl,
-                                      timestamp,
-                                    ),
-                                    child: Container(
-                                      width: 80,
-                                      margin: const EdgeInsets.only(right: 12),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            width: 70,
-                                            height: 70,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: const Color(0xFF00BCD4),
-                                                width: 3,
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(3),
-                                              child: CircleAvatar(
-                                                backgroundColor:
-                                                    Colors.grey[300],
-                                                backgroundImage:
-                                                    photoUrl != null
-                                                    ? NetworkImage(photoUrl)
-                                                    : null,
-                                                child: photoUrl == null
-                                                    ? const Icon(
-                                                        Icons.person,
-                                                        color: Colors.white,
-                                                      )
-                                                    : null,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            timestamp != null
-                                                ? _formatTimestamp(timestamp)
-                                                : '',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.grey[600],
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          Text(
-                                            statusText,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey[800],
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(20),
+                                onTap: () {
+                                  _showStatusDetail(
+                                    userName,
+                                    latestStatus['statusText'] as String? ?? '',
+                                    photoUrl,
+                                    latestStatus['timestamp'] as Timestamp?,
                                   );
                                 },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF1E1E1E),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.white.withOpacity(
+                                                0.05,
+                                              ),
+                                              offset: const Offset(-3, -3),
+                                              blurRadius: 6,
+                                            ),
+                                            const BoxShadow(
+                                              color: Colors.black54,
+                                              offset: Offset(3, 3),
+                                              blurRadius: 6,
+                                            ),
+                                          ],
+                                        ),
+                                        child: photoUrl != null
+                                            ? CircleAvatar(
+                                                radius: 12,
+                                                backgroundImage: NetworkImage(
+                                                  photoUrl,
+                                                ),
+                                              )
+                                            : const Icon(
+                                                Icons.person,
+                                                color: Color(0xFFFF4757),
+                                                size: 24,
+                                              ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              userName,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${userStatuses.length} update${userStatuses.length > 1 ? 's' : ''}',
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.white38,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                            const Divider(height: 1),
-                          ],
+                          ),
                         );
                       },
                     );
@@ -342,25 +353,30 @@ class _StatusScreenState extends State<StatusScreen> {
       floatingActionButton: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFF4757).withOpacity(0.5),
-              offset: const Offset(0, 4),
+              color: Colors.white.withOpacity(0.05),
+              offset: const Offset(-4, -4),
+              blurRadius: 10,
+            ),
+            const BoxShadow(
+              color: Colors.black54,
+              offset: Offset(4, 4),
+              blurRadius: 10,
+            ),
+            BoxShadow(
+              color: const Color(0xFFFF4757).withOpacity(0.3),
+              offset: const Offset(0, 0),
               blurRadius: 20,
               spreadRadius: 0,
             ),
           ],
         ),
         child: FloatingActionButton(
-          backgroundColor: Colors.transparent,
+          backgroundColor: const Color(0xFFFF4757),
           elevation: 0,
           onPressed: () => _showAddStatusDialog(null, null),
-          child: const Icon(Icons.add, color: Colors.white),
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),
       ),
     );
@@ -411,46 +427,115 @@ class _StatusScreenState extends State<StatusScreen> {
               ),
             ),
             if (myStatuses.isEmpty)
-              ListTile(
-                leading: StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore.collection('users').doc(uid).snapshots(),
-                  builder: (context, userSnapshot) {
-                    final userData =
-                        userSnapshot.data?.data() as Map<String, dynamic>?;
-                    final photoUrl = userData?['photoUrl'] as String?;
-                    return Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.05),
+                        offset: const Offset(-4, -4),
+                        blurRadius: 10,
+                      ),
+                      const BoxShadow(
+                        color: Colors.black54,
+                        offset: Offset(4, 4),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () => _showAddStatusDialog(null, null),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            StreamBuilder<DocumentSnapshot>(
+                              stream: _firestore
+                                  .collection('users')
+                                  .doc(uid)
+                                  .snapshots(),
+                              builder: (context, userSnapshot) {
+                                final userData =
+                                    userSnapshot.data?.data()
+                                        as Map<String, dynamic>?;
+                                final photoUrl =
+                                    userData?['photoUrl'] as String?;
+                                return Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1E1E1E),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(0.05),
+                                        offset: const Offset(-3, -3),
+                                        blurRadius: 6,
+                                      ),
+                                      const BoxShadow(
+                                        color: Colors.black54,
+                                        offset: Offset(3, 3),
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                  child: photoUrl != null
+                                      ? CircleAvatar(
+                                          radius: 12,
+                                          backgroundImage: NetworkImage(
+                                            photoUrl,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.person,
+                                          color: Color(0xFFFF4757),
+                                          size: 24,
+                                        ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'My Status',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Tap to add status update',
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(
+                              Icons.add_circle_outline,
+                              color: Color(0xFFFF4757),
+                            ),
+                          ],
                         ),
                       ),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.transparent,
-                        backgroundImage: photoUrl != null
-                            ? NetworkImage(photoUrl)
-                            : null,
-                        child: photoUrl == null
-                            ? const Icon(Icons.person, color: Colors.white)
-                            : null,
-                      ),
-                    );
-                  },
-                ),
-                title: const Text(
-                  'My Status',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    ),
                   ),
                 ),
-                subtitle: const Text(
-                  'Tap to add status update',
-                  style: TextStyle(color: Colors.white54),
-                ),
-                onTap: () => _showAddStatusDialog(null, null),
               )
             else
               Container(
@@ -603,11 +688,14 @@ class _StatusScreenState extends State<StatusScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFF2A2A2A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           isEditing ? 'Edit Status' : 'Add Status',
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Container(
           decoration: BoxDecoration(
@@ -616,18 +704,19 @@ class _StatusScreenState extends State<StatusScreen> {
             boxShadow: [
               BoxShadow(
                 color: Colors.white.withOpacity(0.03),
-                offset: const Offset(-4, -4),
-                blurRadius: 8,
+                offset: const Offset(-3, -3),
+                blurRadius: 6,
               ),
               const BoxShadow(
                 color: Colors.black87,
-                offset: Offset(4, 4),
-                blurRadius: 8,
+                offset: Offset(3, 3),
+                blurRadius: 6,
               ),
             ],
           ),
           child: TextField(
             controller: controller,
+            autofocus: true,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'What\'s on your mind?',
@@ -638,13 +727,6 @@ class _StatusScreenState extends State<StatusScreen> {
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide.none,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(
-                  color: Color(0xFFFF4757),
-                  width: 2.0,
-                ),
-              ),
               contentPadding: const EdgeInsets.all(16),
             ),
             maxLines: 3,
@@ -654,96 +736,73 @@ class _StatusScreenState extends State<StatusScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: Colors.white54),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF4757).withOpacity(0.5),
-                  offset: const Offset(0, 4),
-                  blurRadius: 20,
-                ),
-              ],
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4757),
             ),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              onPressed: () async {
-                final text = controller.text.trim();
-                if (text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Status cannot be empty')),
-                  );
-                  return;
-                }
+            onPressed: () async {
+              final text = controller.text.trim();
+              if (text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Status cannot be empty')),
+                );
+                return;
+              }
 
-                final currentUser = _auth.currentUser;
-                if (currentUser == null) return;
+              final currentUser = _auth.currentUser;
+              if (currentUser == null) return;
 
-                // Get user details
-                final userDoc = await _firestore
-                    .collection('users')
-                    .doc(currentUser.uid)
-                    .get();
-                final userData = userDoc.data();
+              // Get user details
+              final userDoc = await _firestore
+                  .collection('users')
+                  .doc(currentUser.uid)
+                  .get();
+              final userData = userDoc.data();
 
-                if (isEditing) {
-                  // Update existing status
-                  await _firestore
-                      .collection('statuses')
-                      .doc(existingStatusId)
-                      .update({
-                        'statusText': text,
-                        'timestamp': FieldValue.serverTimestamp(),
-                      });
-                } else {
-                  // Add new status to Firestore (don't delete old ones)
-                  await _firestore.collection('statuses').add({
-                    'userId': currentUser.uid,
-                    'userName': userData?['name'] ?? 'Unknown',
-                    'photoUrl': userData?['photoUrl'],
-                    'statusText': text,
-                    'timestamp': FieldValue.serverTimestamp(),
-                  });
-                }
+              if (isEditing) {
+                // Update existing status
+                await _firestore
+                    .collection('statuses')
+                    .doc(existingStatusId)
+                    .update({
+                      'statusText': text,
+                      'timestamp': FieldValue.serverTimestamp(),
+                    });
+              } else {
+                // Add new status to Firestore (don't delete old ones)
+                await _firestore.collection('statuses').add({
+                  'userId': currentUser.uid,
+                  'userName': userData?['name'] ?? 'Unknown',
+                  'photoUrl': userData?['photoUrl'],
+                  'statusText': text,
+                  'timestamp': FieldValue.serverTimestamp(),
+                });
+              }
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: const Color(0xFF252525),
-                      content: Text(
-                        isEditing
-                            ? 'Status updated successfully'
-                            : 'Status added successfully',
-                        style: const TextStyle(color: Colors.white),
-                      ),
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: const Color(0xFF252525),
+                    content: Text(
+                      isEditing
+                          ? 'Status updated successfully'
+                          : 'Status added successfully',
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  );
-                }
-              },
-              child: Text(
-                isEditing ? 'Update' : 'Post',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                  ),
+                );
+              }
+            },
+            child: Text(
+              isEditing ? 'Update' : 'Post',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -754,7 +813,7 @@ class _StatusScreenState extends State<StatusScreen> {
   void _showStatusOptionsMenu(String statusId, String statusText) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFF2A2A2A),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -764,7 +823,11 @@ class _StatusScreenState extends State<StatusScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.edit, color: Color(0xFFFF4757)),
+              leading: const Icon(
+                Icons.edit,
+                color: Color(0xFFFF4757),
+                size: 20,
+              ),
               title: const Text(
                 'Edit Status',
                 style: TextStyle(color: Colors.white),
@@ -775,7 +838,7 @@ class _StatusScreenState extends State<StatusScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: const Icon(Icons.delete, color: Colors.red, size: 20),
               title: const Text(
                 'Delete Status',
                 style: TextStyle(color: Colors.white),
@@ -795,11 +858,11 @@ class _StatusScreenState extends State<StatusScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFF2A2A2A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Delete Status',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         content: const Text(
           'Are you sure you want to delete your status?',
@@ -808,48 +871,32 @@ class _StatusScreenState extends State<StatusScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: Colors.white54),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              gradient: const LinearGradient(
-                colors: [Colors.red, Colors.redAccent],
-              ),
-            ),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              onPressed: () async {
-                await _firestore.collection('statuses').doc(statusId).delete();
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      backgroundColor: Color(0xFF252525),
-                      content: Text(
-                        'Status deleted successfully',
-                        style: TextStyle(color: Colors.white),
-                      ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () async {
+              await _firestore.collection('statuses').doc(statusId).delete();
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    backgroundColor: Color(0xFF252525),
+                    content: Text(
+                      'Status deleted successfully',
+                      style: TextStyle(color: Colors.white),
                     ),
-                  );
-                }
-              },
-              child: const Text(
-                'Delete',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -965,7 +1012,7 @@ class _StatusScreenState extends State<StatusScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF2A2A2A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           padding: const EdgeInsets.all(16),
