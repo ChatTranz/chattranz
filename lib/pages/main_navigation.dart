@@ -49,6 +49,7 @@ class _MainNavigationState extends State<MainNavigation> {
         }
 
         return Scaffold(
+          backgroundColor: const Color(0xFF1E1E1E),
           body: Stack(
             children: [
               _pages[_selectedIndex],
@@ -86,29 +87,148 @@ class _MainNavigationState extends State<MainNavigation> {
                 ),
             ],
           ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: const Color(0xFF00BCD4),
-            unselectedItemColor: Colors.grey,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble),
-                label: 'Chats',
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.03),
+                  offset: const Offset(0, -4),
+                  blurRadius: 12,
+                ),
+                const BoxShadow(
+                  color: Colors.black54,
+                  offset: Offset(0, 2),
+                  blurRadius: 16,
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(Icons.chat_bubble, 'Chats', 0),
+                    _buildNavItem(Icons.group, 'Groups', 1),
+                    _buildNavItem(Icons.call, 'Calls', 2),
+                    _buildNavItem(Icons.circle_outlined, 'Status', 3),
+                  ],
+                ),
               ),
-              BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Groups'),
-              BottomNavigationBarItem(icon: Icon(Icons.call), label: 'Calls'),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.circle_outlined),
-                label: 'Status',
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
+
+  // Neumorphic Navigation Item
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.05),
+                    offset: const Offset(-3, -3),
+                    blurRadius: 8,
+                  ),
+                  const BoxShadow(
+                    color: Colors.black54,
+                    offset: Offset(3, 3),
+                    blurRadius: 8,
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFFFF4757) : Colors.white38,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFFFF4757) : Colors.white38,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Helper function for call buttons
+Widget _buildCallButton({
+  required VoidCallback onPressed,
+  required IconData icon,
+  required String label,
+  required Color color,
+}) {
+  return Column(
+    children: [
+      Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: [color, color.withOpacity(0.8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.5),
+              offset: const Offset(0, 4),
+              blurRadius: 16,
+            ),
+            const BoxShadow(
+              color: Colors.black54,
+              offset: Offset(0, 8),
+              blurRadius: 16,
+              spreadRadius: -4,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const CircleBorder(),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Icon(icon, color: Colors.white, size: 28),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
 }
 
 class _IncomingCallOverlay extends StatelessWidget {
@@ -130,57 +250,98 @@ class _IncomingCallOverlay extends StatelessWidget {
       child: IgnorePointer(
         ignoring: false,
         child: Container(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withOpacity(0.85),
           child: Center(
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
+            child: Container(
+              margin: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.05),
+                    offset: const Offset(-8, -8),
+                    blurRadius: 20,
+                  ),
+                  const BoxShadow(
+                    color: Colors.black87,
+                    offset: Offset(8, 8),
+                    blurRadius: 20,
+                  ),
+                ],
               ),
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Incoming Call',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      callerName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(status == 'ringing' ? 'Ringing…' : 'Calling…'),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                          ),
-                          onPressed: onAccept,
-                          icon: const Icon(Icons.call),
-                          label: const Text('Accept'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Animated icon
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.05),
+                          offset: const Offset(-6, -6),
+                          blurRadius: 12,
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          onPressed: onDecline,
-                          icon: const Icon(Icons.call_end),
-                          label: const Text('Decline'),
+                        const BoxShadow(
+                          color: Colors.black54,
+                          offset: Offset(6, 6),
+                          blurRadius: 12,
                         ),
                       ],
                     ),
-                  ],
-                ),
+                    child: const Icon(
+                      Icons.phone_in_talk_rounded,
+                      size: 48,
+                      color: Color(0xFF4CAF50),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Incoming Call',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 16,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    callerName,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    status == 'ringing' ? 'Ringing…' : 'Calling…',
+                    style: const TextStyle(color: Colors.white38, fontSize: 14),
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildCallButton(
+                        onPressed: onAccept,
+                        icon: Icons.call,
+                        label: 'Accept',
+                        color: const Color(0xFF4CAF50),
+                      ),
+                      const SizedBox(width: 24),
+                      _buildCallButton(
+                        onPressed: onDecline,
+                        icon: Icons.call_end,
+                        label: 'Decline',
+                        color: const Color(0xFFFF4757),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
