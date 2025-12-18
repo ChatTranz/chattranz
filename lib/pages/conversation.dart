@@ -378,55 +378,112 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         const Text(
                           "Online",
-                          style: TextStyle(color: Color(0xFF4CAF50), fontSize: 12),
+                          style: TextStyle(
+                            color: Color(0xFF4CAF50),
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  DropdownButton<String>(
-                    value: preferredLang,
-                    dropdownColor: const Color(0xFF252525),
-                    style: const TextStyle(color: Colors.white),
-                    iconEnabledColor: Colors.white,
-                    onChanged: (String? newLang) {
-                      if (newLang == null) return;
-                      setState(() => preferredLang = newLang);
-                      _savePreferredLang(newLang);
-                    },
-                    items: const [
-                      DropdownMenuItem(value: 'en', child: Text('English')),
-                      DropdownMenuItem(value: 'si', child: Text('Sinhala')),
-                      DropdownMenuItem(value: 'ta', child: Text('Tamil')),
-                      DropdownMenuItem(value: 'fr', child: Text('French')),
-                      DropdownMenuItem(value: 'es', child: Text('Spanish')),
-                      DropdownMenuItem(value: 'de', child: Text('German')),
-                      DropdownMenuItem(value: 'hi', child: Text('Hindi')),
-                      DropdownMenuItem(
-                        value: 'zh-CN',
-                        child: Text('Chinese (Simplified)'),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF252525),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.03),
+                          offset: const Offset(-2, -2),
+                          blurRadius: 4,
+                        ),
+                        const BoxShadow(
+                          color: Colors.black87,
+                          offset: Offset(2, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: preferredLang,
+                        dropdownColor: const Color(0xFF252525),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        icon: const Icon(
+                          Icons.language,
+                          color: Color(0xFFFF4757),
+                          size: 20,
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                        onChanged: (String? newLang) {
+                          if (newLang == null) return;
+                          setState(() => preferredLang = newLang);
+                          _savePreferredLang(newLang);
+                        },
+                        items: const [
+                          DropdownMenuItem(value: 'en', child: Text('English')),
+                          DropdownMenuItem(value: 'si', child: Text('Sinhala')),
+                          DropdownMenuItem(value: 'ta', child: Text('Tamil')),
+                          DropdownMenuItem(value: 'fr', child: Text('French')),
+                          DropdownMenuItem(value: 'es', child: Text('Spanish')),
+                          DropdownMenuItem(value: 'de', child: Text('German')),
+                          DropdownMenuItem(value: 'hi', child: Text('Hindi')),
+                          DropdownMenuItem(
+                            value: 'zh-CN',
+                            child: Text('Chinese (Simplified)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'ja',
+                            child: Text('Japanese'),
+                          ),
+                          DropdownMenuItem(value: 'ar', child: Text('Arabic')),
+                          DropdownMenuItem(value: 'ru', child: Text('Russian')),
+                          DropdownMenuItem(
+                            value: 'pt',
+                            child: Text('Portuguese'),
+                          ),
+                          DropdownMenuItem(value: 'it', child: Text('Italian')),
+                          DropdownMenuItem(value: 'tr', child: Text('Turkish')),
+                          DropdownMenuItem(value: 'ur', child: Text('Urdu')),
+                          DropdownMenuItem(value: 'bn', child: Text('Bengali')),
+                          DropdownMenuItem(value: 'ko', child: Text('Korean')),
+                          DropdownMenuItem(
+                            value: 'vi',
+                            child: Text('Vietnamese'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'id',
+                            child: Text('Indonesian'),
+                          ),
+                          DropdownMenuItem(value: 'th', child: Text('Thai')),
+                          DropdownMenuItem(value: 'nl', child: Text('Dutch')),
+                          DropdownMenuItem(value: 'el', child: Text('Greek')),
+                          DropdownMenuItem(value: 'sv', child: Text('Swedish')),
+                          DropdownMenuItem(value: 'cs', child: Text('Czech')),
+                          DropdownMenuItem(
+                            value: 'ro',
+                            child: Text('Romanian'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'hu',
+                            child: Text('Hungarian'),
+                          ),
+                          DropdownMenuItem(value: 'sk', child: Text('Slovak')),
+                          DropdownMenuItem(value: 'pl', child: Text('Polish')),
+                          DropdownMenuItem(
+                            value: 'uk',
+                            child: Text('Ukrainian'),
+                          ),
+                        ],
                       ),
-                      DropdownMenuItem(value: 'ja', child: Text('Japanese')),
-                      DropdownMenuItem(value: 'ar', child: Text('Arabic')),
-                      DropdownMenuItem(value: 'ru', child: Text('Russian')),
-                      DropdownMenuItem(value: 'pt', child: Text('Portuguese')),
-                      DropdownMenuItem(value: 'it', child: Text('Italian')),
-                      DropdownMenuItem(value: 'tr', child: Text('Turkish')),
-                      DropdownMenuItem(value: 'ur', child: Text('Urdu')),
-                      DropdownMenuItem(value: 'bn', child: Text('Bengali')),
-                      DropdownMenuItem(value: 'ko', child: Text('Korean')),
-                      DropdownMenuItem(value: 'vi', child: Text('Vietnamese')),
-                      DropdownMenuItem(value: 'id', child: Text('Indonesian')),
-                      DropdownMenuItem(value: 'th', child: Text('Thai')),
-                      DropdownMenuItem(value: 'nl', child: Text('Dutch')),
-                      DropdownMenuItem(value: 'el', child: Text('Greek')),
-                      DropdownMenuItem(value: 'sv', child: Text('Swedish')),
-                      DropdownMenuItem(value: 'cs', child: Text('Czech')),
-                      DropdownMenuItem(value: 'ro', child: Text('Romanian')),
-                      DropdownMenuItem(value: 'hu', child: Text('Hungarian')),
-                      DropdownMenuItem(value: 'sk', child: Text('Slovak')),
-                      DropdownMenuItem(value: 'pl', child: Text('Polish')),
-                      DropdownMenuItem(value: 'uk', child: Text('Ukrainian')),
-                    ],
+                    ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
@@ -469,7 +526,10 @@ class _ChatPageState extends State<ChatPage> {
                         decoration: BoxDecoration(
                           gradient: isMe
                               ? const LinearGradient(
-                                  colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                                  colors: [
+                                    Color(0xFFFF4757),
+                                    Color(0xFFFF6B7A),
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 )
@@ -497,9 +557,7 @@ class _ChatPageState extends State<ChatPage> {
                                   Text(
                                     (msg['displayText'] ?? msg['text'] ?? '')
                                         .toString(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                    ),
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -561,7 +619,9 @@ class _ChatPageState extends State<ChatPage> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: "Type a message...",
-                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                          hintStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.3),
+                          ),
                         ),
                       ),
                     ),
