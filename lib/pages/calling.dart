@@ -174,43 +174,58 @@ class _CallingScreenState extends State<CallingScreen> {
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 60.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _callButton(
-                    icon: Icons.call_end,
-                    color: Colors.red,
-                    onPressed: _end,
-                  ),
-                  const SizedBox(width: 40),
-                  if (_status != 'answered')
-                    _callButton(
-                      icon: Icons.call,
-                      color: Colors.green,
-                      onPressed: () async {
-                        if (_status == 'ringing' || _status == 'calling') {
-                          await _service.updateStatus(
-                            widget.callId,
-                            'answered',
-                          );
-                          // Receiver starts audio immediately after answering.
-                          _startReceiverAudio();
-                        }
-                      },
+              child: _status == 'answered'
+                  ? SizedBox(
+                      width: 200,
+                      height: 60,
+                      child: ElevatedButton.icon(
+                        onPressed: _end,
+                        icon: const Icon(
+                          Icons.call_end,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        label: const Text(
+                          'End Call',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _callButton(
+                          icon: Icons.call_end,
+                          color: Colors.red,
+                          onPressed: _end,
+                        ),
+                        const SizedBox(width: 40),
+                        _callButton(
+                          icon: Icons.call,
+                          color: Colors.green,
+                          onPressed: () async {
+                            if (_status == 'ringing' || _status == 'calling') {
+                              await _service.updateStatus(
+                                widget.callId,
+                                'answered',
+                              );
+                              // Receiver starts audio immediately after answering.
+                              _startReceiverAudio();
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                  if (_status == 'answered')
-                    _callButton(
-                      icon: _controls?.isMuted == true
-                          ? Icons.mic_off
-                          : Icons.mic,
-                      color: Colors.blueGrey,
-                      onPressed: () {
-                        _controls?.toggleMute();
-                        setState(() {});
-                      },
-                    ),
-                ],
-              ),
             ),
           ],
         ),
