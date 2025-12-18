@@ -80,9 +80,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = _auth.currentUser;
     if (user == null) return;
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Name cannot be empty')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFF252525),
+          content: Text(
+            'Name cannot be empty',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
       return;
     }
     setState(() => _saving = true);
@@ -94,16 +100,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Profile updated')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF252525),
+            content: Text(
+              'Profile updated',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Profile save error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to save profile')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF252525),
+            content: Text(
+              'Failed to save profile',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -119,14 +137,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }, SetOptions(merge: true));
     }
     await FirebaseAuth.instance.signOut();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Logged out')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Color(0xFF252525),
+        content: Text('Logged out', style: TextStyle(color: Colors.white)),
+      ),
+    );
   }
 
   void _openAvatarPicker() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: const Color(0xFF252525),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -152,7 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Positioned.fill(
                       child: CircleAvatar(
-                        backgroundColor: Colors.grey.shade200,
+                        backgroundColor: const Color(0xFF1E1E1E),
                         backgroundImage: NetworkImage(option.url),
                       ),
                     ),
@@ -162,9 +184,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         bottom: 0,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.blue,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                            ),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(
+                              color: const Color(0xFF252525),
+                              width: 2,
+                            ),
                           ),
                           padding: const EdgeInsets.all(4),
                           child: const Icon(
@@ -187,10 +214,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
         leading: const BackButton(color: Colors.white),
-        title: const Text('Profile'),
-        backgroundColor: const Color(0xFF2196F3),
+        title: ShaderMask(
+          blendMode: BlendMode.srcIn,
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(bounds),
+          child: const Text(
+            'Profile',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        backgroundColor: const Color(0xFF1E1E1E),
+        elevation: 0,
         actions: [
           IconButton(
             icon: _saving
@@ -199,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Color(0xFFFF4757),
                     ),
                   )
                 : const Icon(Icons.save),
@@ -214,91 +258,297 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFFFF4757)),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.blue.shade100,
-                          backgroundImage: _resolveAvatarProvider(),
-                          child: _resolveAvatarProvider() == null
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 60,
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.05),
+                      offset: const Offset(-6, -6),
+                      blurRadius: 16,
+                      spreadRadius: 0,
+                    ),
+                    const BoxShadow(
+                      color: Colors.black45,
+                      offset: Offset(6, 6),
+                      blurRadius: 16,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFFFF4757,
+                                  ).withOpacity(0.5),
+                                  offset: const Offset(0, 4),
+                                  blurRadius: 20,
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 60,
+                              backgroundColor: const Color(0xFF252525),
+                              backgroundImage: _resolveAvatarProvider(),
+                              child: _resolveAvatarProvider() == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.white38,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: InkWell(
+                              onTap: _openAvatarPicker,
+                              borderRadius: BorderRadius.circular(24),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFFF4757),
+                                      Color(0xFFFF6B7A),
+                                    ],
+                                  ),
+                                  border: Border.all(
+                                    color: const Color(0xFF1E1E1E),
+                                    width: 3,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: const Icon(
+                                  Icons.edit,
+                                  size: 18,
                                   color: Colors.white,
-                                )
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: InkWell(
-                            onTap: _openAvatarPicker,
-                            borderRadius: BorderRadius.circular(24),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFF1976D2),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
                                 ),
                               ),
-                              padding: const EdgeInsets.all(8),
-                              child: const Icon(
-                                Icons.edit,
-                                size: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.03),
+                            offset: const Offset(-4, -4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                          const BoxShadow(
+                            color: Colors.black87,
+                            offset: Offset(4, 4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _nameController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          labelStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.person_outline,
+                            color: Colors.white38,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFF252525),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFFF4757),
+                              width: 2.0,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 18,
+                            horizontal: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.03),
+                            offset: const Offset(-4, -4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                          const BoxShadow(
+                            color: Colors.black87,
+                            offset: Offset(4, 4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _bioController,
+                        maxLines: 3,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Bio',
+                          labelStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                          ),
+                          alignLabelWithHint: true,
+                          prefixIcon: const Icon(
+                            Icons.info_outline,
+                            color: Colors.white38,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFF252525),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFFF4757),
+                              width: 2.0,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 18,
+                            horizontal: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF4757).withOpacity(0.5),
+                                offset: const Offset(0, 4),
+                                blurRadius: 20,
+                                spreadRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: _saving ? null : _saveProfile,
+                            icon: const Icon(Icons.save, color: Colors.white),
+                            label: const Text(
+                              'Save Changes',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1E1E),
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.05),
+                                offset: const Offset(-4, -4),
+                                blurRadius: 8,
+                              ),
+                              const BoxShadow(
+                                color: Colors.black87,
+                                offset: Offset(4, 4),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: OutlinedButton.icon(
+                            onPressed: _openAvatarPicker,
+                            icon: const Icon(
+                              Icons.image_outlined,
+                              color: Color(0xFFFF4757),
+                            ),
+                            label: const Text(
+                              'Change Avatar',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFFF4757),
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              side: const BorderSide(
+                                color: Color(0xFFFF4757),
+                                width: 2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      prefixIcon: Icon(Icons.person_outline),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: _bioController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Bio',
-                      alignLabelWithHint: true,
-                      prefixIcon: Icon(Icons.info_outline),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _saving ? null : _saveProfile,
-                        icon: const Icon(Icons.save),
-                        label: const Text('Save Changes'),
-                      ),
-                      const SizedBox(width: 16),
-                      OutlinedButton.icon(
-                        onPressed: _openAvatarPicker,
-                        icon: const Icon(Icons.image_outlined),
-                        label: const Text('Change Avatar'),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
     );
