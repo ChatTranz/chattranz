@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5),
+      backgroundColor: const Color(0xFF1E1E1E), // Dark Neumorphic base
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -40,26 +40,52 @@ class _LoginScreenState extends State<LoginScreen> {
                 horizontal: 24.0,
                 vertical: 30.0,
               ),
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(32.0),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFF1E1E1E), // Same as background
+                borderRadius: BorderRadius.circular(30),
                 boxShadow: [
+                  // Light shadow (top-left)
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    spreadRadius: 5,
-                    blurRadius: 15,
+                    color: Colors.white.withOpacity(0.05),
+                    offset: const Offset(-6, -6),
+                    blurRadius: 16,
+                    spreadRadius: 0,
+                  ),
+                  // Dark shadow (bottom-right)
+                  const BoxShadow(
+                    color: Colors.black45,
+                    offset: Offset(6, 6),
+                    blurRadius: 16,
+                    spreadRadius: 0,
                   ),
                 ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/loadingLogo.png', // same icon as register page
-                    height: 100,
+                  // Logo with Neumorphic container
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.05),
+                          offset: const Offset(-4, -4),
+                          blurRadius: 10,
+                        ),
+                        const BoxShadow(
+                          color: Colors.black54,
+                          offset: Offset(4, 4),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset('assets/loadingLogo.png', height: 80),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
 
                   // --- Header Section ---
                   Row(
@@ -68,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ShaderMask(
                         blendMode: BlendMode.srcIn,
                         shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFF5B77DB), Color(0xFF17B2F8)],
+                          colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
@@ -94,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text(
                     'Login to your account to continue',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    style: TextStyle(fontSize: 16, color: Colors.white54),
                   ),
                   const SizedBox(height: 40),
 
@@ -105,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     prefixIcon: Icons.mail_outline,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   _buildPasswordField(),
                   const SizedBox(height: 10),
 
@@ -116,89 +142,63 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         print('Forgot Password clicked');
                       },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFFFF4757),
+                      ),
                       child: const Text(
                         'Forgot Password?',
                         style: TextStyle(
-                          color: Color(0xFF4579F2),
+                          color: Color(0xFFFF6B7A),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
 
                   // --- Login Button ---
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final email = _emailController.text.trim();
-                        final password = _passwordController.text.trim();
+                  _buildNeumorphicButton(
+                    onPressed: () async {
+                      final email = _emailController.text.trim();
+                      final password = _passwordController.text.trim();
 
-                        if (email.isEmpty || password.isEmpty) {
-                          Fluttertoast.showToast(
-                            msg: "Please enter email and password",
-                          );
-                          return;
-                        }
+                      if (email.isEmpty || password.isEmpty) {
+                        Fluttertoast.showToast(
+                          msg: "Please enter email and password",
+                        );
+                        return;
+                      }
 
-                        if (!mounted) return;
-                        setState(() => _isLoading = true);
+                      if (!mounted) return;
+                      setState(() => _isLoading = true);
 
-                        try {
-                          final user = await _authService.loginUser(
-                            email,
-                            password,
-                          );
-                          if (user != null) {
-                            Fluttertoast.showToast(msg: "Login Successful!");
-                            if (!mounted)
-                              return; // stop if disposed before navigation
-                            await Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MainNavigation(),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          Fluttertoast.showToast(
-                            msg: "Login failed: ${e.toString()}",
-                          );
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isLoading = false);
-                          }
-                        }
-                      },
-
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF17B2F8),
-                        elevation: 4,
-                        shadowColor: Colors.black.withOpacity(1.0),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: const StadiumBorder(),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : const Text(
-                              'Log In',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                      try {
+                        final user = await _authService.loginUser(
+                          email,
+                          password,
+                        );
+                        if (user != null) {
+                          Fluttertoast.showToast(msg: "Login Successful!");
+                          if (!mounted)
+                            return; // stop if disposed before navigation
+                          await Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainNavigation(),
                             ),
-                    ),
+                          );
+                        }
+                      } catch (e) {
+                        Fluttertoast.showToast(
+                          msg: "Login failed: ${e.toString()}",
+                        );
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isLoading = false);
+                        }
+                      }
+                    },
+                    isLoading: _isLoading,
                   ),
                   const SizedBox(height: 24),
 
@@ -218,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: "Don't have an account? ",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black54,
+                          color: Colors.white54,
                           fontFamily: 'Inter',
                         ),
                         children: [
@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             text: 'Sign Up',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Color(0xFF4579F2),
+                              color: Color(0xFFFF4757),
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Inter',
                             ),
@@ -244,73 +244,183 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // --- Email Field Helper ---
+  // --- Neumorphic Button ---
+  Widget _buildNeumorphicButton({
+    required VoidCallback onPressed,
+    required bool isLoading,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          // Red glow effect
+          BoxShadow(
+            color: const Color(0xFFFF4757).withOpacity(0.5),
+            offset: const Offset(0, 4),
+            blurRadius: 20,
+            spreadRadius: 0,
+          ),
+          // Bottom shadow for depth
+          const BoxShadow(
+            color: Colors.black54,
+            offset: Offset(0, 8),
+            blurRadius: 16,
+            spreadRadius: -4,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLoading ? null : onPressed,
+          borderRadius: BorderRadius.circular(25),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            child: Center(
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Log In',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- Neumorphic Text Field ---
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
     TextInputType keyboardType = TextInputType.text,
     IconData? prefixIcon,
   }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.black38),
-        filled: true,
-        fillColor: const Color.fromARGB(213, 194, 236, 255),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          // Inner shadow effect (top-left light)
+          BoxShadow(
+            color: Colors.white.withOpacity(0.03),
+            offset: const Offset(-4, -4),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+          // Inner shadow effect (bottom-right dark)
+          const BoxShadow(
+            color: Colors.black87,
+            offset: Offset(4, 4),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+          filled: true,
+          fillColor: const Color(0xFF252525),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: Color(0xFFFF4757), width: 2.0),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 20,
+          ),
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, color: Colors.white38)
+              : null,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 20,
-        ),
-        prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: Colors.grey[700])
-            : null,
       ),
     );
   }
 
-  // --- Password Field Helper ---
+  // --- Neumorphic Password Field ---
   Widget _buildPasswordField() {
-    return TextField(
-      controller: _passwordController,
-      obscureText: !_isPasswordVisible,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        hintStyle: const TextStyle(color: Colors.black38),
-        filled: true,
-        fillColor: const Color.fromARGB(213, 194, 236, 255),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.blue, width: 1.0),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 20,
-        ),
-        prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[700]),
-        suffixIcon: IconButton(
-          icon: Icon(
-            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-            color: Colors.black45,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          // Inner shadow effect (top-left light)
+          BoxShadow(
+            color: Colors.white.withOpacity(0.03),
+            offset: const Offset(-4, -4),
+            blurRadius: 8,
+            spreadRadius: 0,
           ),
-          onPressed: () {
-            setState(() {
-              _isPasswordVisible = !_isPasswordVisible;
-            });
-          },
+          // Inner shadow effect (bottom-right dark)
+          const BoxShadow(
+            color: Colors.black87,
+            offset: Offset(4, 4),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _passwordController,
+        obscureText: !_isPasswordVisible,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: 'Password',
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+          filled: true,
+          fillColor: const Color(0xFF252525),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: Color(0xFFFF4757), width: 2.0),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 20,
+          ),
+          prefixIcon: const Icon(Icons.lock_outline, color: Colors.white38),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              color: Colors.white38,
+            ),
+            onPressed: () {
+              setState(() {
+                _isPasswordVisible = !_isPasswordVisible;
+              });
+            },
+          ),
         ),
       ),
     );
