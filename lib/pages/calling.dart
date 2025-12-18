@@ -85,9 +85,13 @@ class _CallingScreenState extends State<CallingScreen> {
   }
 
   Future<void> _end() async {
+    _popped =
+        true; // Set flag before ending to prevent listener from also popping
     await _service.endCall(widget.callId);
     await _voice.dispose();
-    if (mounted) Navigator.pop(context);
+    if (mounted && Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
   }
 
   @override
