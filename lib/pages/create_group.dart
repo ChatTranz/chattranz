@@ -28,6 +28,10 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     final picked = await showModalBottomSheet<List<String>>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: const Color(0xFF2A2A2A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
       builder: (ctx) {
         final selected = <String>{
           ..._selectedMembers.map((m) => m['id'] as String),
@@ -40,26 +44,33 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
                             'Select members',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                           TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFFFF4757),
+                            ),
                             onPressed: () =>
                                 Navigator.of(ctx).pop(selected.toList()),
-                            child: const Text('Done'),
+                            child: const Text(
+                              'Done',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: Colors.white.withOpacity(0.1)),
                     Expanded(
                       child: ListView.builder(
                         itemCount: users.length,
@@ -74,17 +85,45 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                                       'User')
                                   .toString();
                           final checked = selected.contains(id);
-                          return CheckboxListTile(
-                            value: checked,
-                            title: Text(name),
-                            onChanged: (v) {
-                              setModalState(() {
-                                if (v == true)
-                                  selected.add(id);
-                                else
-                                  selected.remove(id);
-                              });
-                            },
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E1E1E),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.03),
+                                  offset: const Offset(-2, -2),
+                                  blurRadius: 6,
+                                ),
+                                const BoxShadow(
+                                  color: Colors.black54,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: CheckboxListTile(
+                              value: checked,
+                              title: Text(
+                                name,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              activeColor: const Color(0xFFFF4757),
+                              checkColor: Colors.white,
+                              tileColor: Colors.transparent,
+                              onChanged: (v) {
+                                setModalState(() {
+                                  if (v == true)
+                                    selected.add(id);
+                                  else
+                                    selected.remove(id);
+                                });
+                              },
+                            ),
                           );
                         },
                       ),
@@ -157,24 +196,54 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFF1E1E1E),
       body: Column(
         children: [
-          // AppBar-like header
+          // Neumorphic header
           Container(
             height: 120,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0A84FF), Color(0xFF1E90FF)],
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(25),
               ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.05),
+                  offset: const Offset(-6, -6),
+                  blurRadius: 16,
+                ),
+                const BoxShadow(
+                  color: Colors.black54,
+                  offset: Offset(6, 6),
+                  blurRadius: 16,
+                ),
+              ],
             ),
             padding: const EdgeInsets.only(top: 36, left: 8, right: 8),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.of(context).pop(),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.05),
+                        offset: const Offset(-3, -3),
+                        blurRadius: 6,
+                      ),
+                      const BoxShadow(
+                        color: Colors.black54,
+                        offset: Offset(3, 3),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
                 const Expanded(
                   child: Center(
@@ -182,8 +251,9 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                       'Create Group',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -193,57 +263,143 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Name Group',
-                  style: TextStyle(color: Colors.black54),
+                  'Group Name',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter Name Group',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.03),
+                        offset: const Offset(-4, -4),
+                        blurRadius: 8,
+                      ),
+                      const BoxShadow(
+                        color: Colors.black87,
+                        offset: Offset(4, 4),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _nameController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Enter group name',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFF252525),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFFF4757),
+                          width: 2,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 18,
+                        horizontal: 20,
+                      ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 18),
-                const Text('Members', style: TextStyle(color: Colors.black54)),
-                const SizedBox(height: 8),
+                const SizedBox(height: 24),
+                const Text(
+                  'Members',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
 
                 GestureDetector(
                   onTap: _pickMembers,
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      vertical: 18,
-                      horizontal: 12,
+                      vertical: 20,
+                      horizontal: 20,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE6F7FF),
-                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFF1E1E1E),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.03),
+                          offset: const Offset(-4, -4),
+                          blurRadius: 8,
+                        ),
+                        const BoxShadow(
+                          color: Colors.black87,
+                          offset: Offset(4, 4),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.add, color: Color(0xFF0A84FF)),
-                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1E1E),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.05),
+                                offset: const Offset(-2, -2),
+                                blurRadius: 4,
+                              ),
+                              const BoxShadow(
+                                color: Colors.black54,
+                                offset: Offset(2, 2),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.person_add,
+                            color: Color(0xFFFF4757),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
                         Expanded(
                           child: Text(
                             _selectedMembers.isEmpty
                                 ? 'Add members to group'
                                 : '${_selectedMembers.length} members selected',
-                            style: const TextStyle(color: Color(0xFF0A84FF)),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 15,
+                            ),
                           ),
                         ),
+                        const Icon(Icons.chevron_right, color: Colors.white38),
                       ],
                     ),
                   ),
@@ -255,24 +411,59 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
           const Spacer(),
 
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
+            padding: const EdgeInsets.all(20.0),
+            child: Container(
               width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E90FF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF4757).withOpacity(0.5),
+                    offset: const Offset(0, 4),
+                    blurRadius: 20,
+                  ),
+                  const BoxShadow(
+                    color: Colors.black54,
+                    offset: Offset(0, 8),
+                    blurRadius: 16,
+                    spreadRadius: -4,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _creating ? null : _createGroup,
+                  borderRadius: BorderRadius.circular(25),
+                  child: Center(
+                    child: _creating
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            'Create Group',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                   ),
                 ),
-                onPressed: _creating ? null : _createGroup,
-                child: _creating
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Create Group',
-                        style: TextStyle(fontSize: 16),
-                      ),
               ),
             ),
           ),
