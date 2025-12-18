@@ -19,17 +19,58 @@ class _GroupsScreenState extends State<GroupsScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Member'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Email or user ID'),
+        backgroundColor: const Color(0xFF2A2A2A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Add Member',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.03),
+                offset: const Offset(-3, -3),
+                blurRadius: 6,
+              ),
+              const BoxShadow(
+                color: Colors.black87,
+                offset: Offset(3, 3),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Email or user ID',
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: const Color(0xFF252525),
+              contentPadding: const EdgeInsets.all(16),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(foregroundColor: Colors.white54),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-          ElevatedButton(
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4757),
+            ),
             onPressed: () async {
               // TODO: Look up user by email and add their uid to members
               Navigator.pop(ctx);
@@ -38,7 +79,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
                 const SnackBar(content: Text('Invite sent / member added')),
               );
             },
-            child: const Text('Add'),
+            child: const Text(
+              'Add',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -50,15 +94,29 @@ class _GroupsScreenState extends State<GroupsScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Exit Group'),
-        content: const Text('Are you sure you want to exit this group?'),
+        backgroundColor: const Color(0xFF2A2A2A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Exit Group',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to exit this group?',
+          style: TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(foregroundColor: Colors.white54),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4757),
+            ),
             onPressed: () async {
               Navigator.pop(ctx);
               if (uid != null) {
@@ -81,7 +139,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
                 }
               }
             },
-            child: const Text('Exit'),
+            child: const Text(
+              'Exit',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -92,17 +153,29 @@ class _GroupsScreenState extends State<GroupsScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Group'),
+        backgroundColor: const Color(0xFF2A2A2A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Delete Group',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         content: const Text(
           'This will permanently delete the group for all members.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(foregroundColor: Colors.white54),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF4757),
+            ),
             onPressed: () async {
               Navigator.pop(ctx);
               try {
@@ -121,7 +194,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
                 ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
               }
             },
-            child: const Text('Delete'),
+            child: const Text(
+              'Delete',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -136,6 +212,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }) {
     showModalBottomSheet<void>(
       context: context,
+      backgroundColor: const Color(0xFF2A2A2A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -148,31 +228,99 @@ class _GroupsScreenState extends State<GroupsScreen> {
                 children: [
                   const Text(
                     'Group Info',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, color: Colors.white70),
                     onPressed: () => Navigator.pop(ctx),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  child: Text(
-                    groupName.isNotEmpty ? groupName[0].toUpperCase() : 'G',
-                  ),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.03),
+                      offset: const Offset(-3, -3),
+                      blurRadius: 8,
+                    ),
+                    const BoxShadow(
+                      color: Colors.black54,
+                      offset: Offset(3, 3),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
-                title: Text(groupName),
-                subtitle: Text('${members.length} members'),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.05),
+                            offset: const Offset(-2, -2),
+                            blurRadius: 4,
+                          ),
+                          const BoxShadow(
+                            color: Colors.black54,
+                            offset: Offset(2, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        groupName.isNotEmpty ? groupName[0].toUpperCase() : 'G',
+                        style: const TextStyle(
+                          color: Color(0xFFFF4757),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            groupName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${members.length} members',
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (createdAt != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     'Created: ${DateTime.fromMillisecondsSinceEpoch(createdAt.millisecondsSinceEpoch)}',
-                    style: const TextStyle(color: Colors.grey),
+                    style: const TextStyle(color: Colors.white38, fontSize: 12),
                   ),
                 ),
               const SizedBox(height: 12),
@@ -203,7 +351,40 @@ class _GroupsScreenState extends State<GroupsScreen> {
         .snapshots(includeMetadataChanges: true);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Groups'), centerTitle: true),
+      backgroundColor: const Color(0xFF1E1E1E),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.03),
+                offset: const Offset(0, -2),
+                blurRadius: 8,
+              ),
+              const BoxShadow(
+                color: Colors.black54,
+                offset: Offset(0, 4),
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: const Text(
+              'Groups',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            centerTitle: true,
+          ),
+        ),
+      ),
       body: StreamBuilder<Set<String>>(
         // first listen to pinned groups
         stream: GroupService.pinnedGroupsStream(),
@@ -213,13 +394,68 @@ class _GroupsScreenState extends State<GroupsScreen> {
             stream: groupsStream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
+                return Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.white54),
+                  ),
+                );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFFF4757),
+                    ),
+                  ),
+                );
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('No groups yet. Create one!'));
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E1E1E),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.03),
+                              offset: const Offset(-6, -6),
+                              blurRadius: 12,
+                            ),
+                            const BoxShadow(
+                              color: Colors.black54,
+                              offset: Offset(6, 6),
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.group_outlined,
+                          size: 80,
+                          color: Colors.white24,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'No groups yet',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Create one!',
+                        style: TextStyle(color: Colors.white38, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                );
               }
 
               // Sort client-side by createdAt desc to avoid requiring a composite index
@@ -259,107 +495,277 @@ class _GroupsScreenState extends State<GroupsScreen> {
                   final members = List<dynamic>.from(data['members'] ?? []);
                   final isPinned = pinned.contains(d.id);
 
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.05),
+                          offset: const Offset(-4, -4),
+                          blurRadius: 10,
+                        ),
+                        const BoxShadow(
+                          color: Colors.black54,
+                          offset: Offset(4, 4),
+                          blurRadius: 10,
+                        ),
+                      ],
                     ),
-                    child: ListTile(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => GroupChatPage(
-                            groupId: d.id,
-                            groupName: name,
-                            memberIds: members,
-                          ),
-                        ),
-                      ),
-                      leading: CircleAvatar(
-                        child: Text(
-                          name.isNotEmpty ? name[0].toUpperCase() : 'G',
-                        ),
-                      ),
-                      title: Row(
-                        children: [
-                          if (isPinned) ...[
-                            const Icon(
-                              Icons.push_pin,
-                              size: 16,
-                              color: Colors.orange,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => GroupChatPage(
+                              groupId: d.id,
+                              groupName: name,
+                              memberIds: members,
                             ),
-                            const SizedBox(width: 4),
-                          ],
-                          Expanded(child: Text(name)),
-                        ],
-                      ),
-                      subtitle: Text('${members.length} members'),
-                      trailing: PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert),
-                        onSelected: (value) async {
-                          switch (value) {
-                            case 'info':
-                              _showGroupInfoBottomSheet(
-                                context,
-                                groupName: name,
-                                members: members,
-                                createdAt: data['createdAt'] as Timestamp?,
-                              );
-                              break;
-                            case 'add':
-                              _showAddMemberDialog(context, d.id);
-                              break;
-                            case 'pin':
-                              if (isPinned) {
-                                await GroupService.unpinGroup(d.id);
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Group unpinned'),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E1E1E),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white.withOpacity(0.05),
+                                      offset: const Offset(-3, -3),
+                                      blurRadius: 6,
                                     ),
-                                  );
-                                }
-                              } else {
-                                await GroupService.pinGroup(d.id);
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Group pinned'),
+                                    const BoxShadow(
+                                      color: Colors.black54,
+                                      offset: Offset(3, 3),
+                                      blurRadius: 6,
                                     ),
-                                  );
-                                }
-                              }
-                              break;
-                            case 'exit':
-                              _showLeaveGroupDialog(context, d.id);
-                              break;
-                            case 'delete':
-                              _confirmDeleteGroup(context, d.id);
-                              break;
-                          }
-                        },
-                        itemBuilder: (ctx) => [
-                          const PopupMenuItem(
-                            value: 'info',
-                            child: Text('Group Info'),
+                                  ],
+                                ),
+                                child: Text(
+                                  name.isNotEmpty ? name[0].toUpperCase() : 'G',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF4757),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        if (isPinned) ...[
+                                          const Icon(
+                                            Icons.push_pin,
+                                            size: 16,
+                                            color: Colors.orange,
+                                          ),
+                                          const SizedBox(width: 4),
+                                        ],
+                                        Expanded(
+                                          child: Text(
+                                            name,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${members.length} members',
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuButton<String>(
+                                color: const Color(0xFF2A2A2A),
+                                icon: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1E1E1E),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(0.05),
+                                        offset: const Offset(-2, -2),
+                                        blurRadius: 4,
+                                      ),
+                                      const BoxShadow(
+                                        color: Colors.black54,
+                                        offset: Offset(2, 2),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.more_vert,
+                                    color: Colors.white70,
+                                    size: 18,
+                                  ),
+                                ),
+                                onSelected: (value) async {
+                                  switch (value) {
+                                    case 'info':
+                                      _showGroupInfoBottomSheet(
+                                        context,
+                                        groupName: name,
+                                        members: members,
+                                        createdAt:
+                                            data['createdAt'] as Timestamp?,
+                                      );
+                                      break;
+                                    case 'add':
+                                      _showAddMemberDialog(context, d.id);
+                                      break;
+                                    case 'pin':
+                                      if (isPinned) {
+                                        await GroupService.unpinGroup(d.id);
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Group unpinned'),
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        await GroupService.pinGroup(d.id);
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Group pinned'),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                      break;
+                                    case 'exit':
+                                      _showLeaveGroupDialog(context, d.id);
+                                      break;
+                                    case 'delete':
+                                      _confirmDeleteGroup(context, d.id);
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (ctx) => [
+                                  PopupMenuItem(
+                                    value: 'info',
+                                    child: Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.info_outline,
+                                          color: Color(0xFFFF4757),
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'Group Info',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'add',
+                                    child: Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.person_add,
+                                          color: Color(0xFFFF4757),
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'Add Members',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'pin',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          isPinned
+                                              ? Icons.push_pin_outlined
+                                              : Icons.push_pin,
+                                          color: const Color(0xFFFF4757),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          isPinned
+                                              ? 'Unpin Group'
+                                              : 'Pin Group',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'exit',
+                                    child: Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.exit_to_app,
+                                          color: Color(0xFFFF4757),
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'Exit Group',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuDivider(),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.delete_outline,
+                                          color: Color(0xFFFF4757),
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'Delete Group',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const PopupMenuItem(
-                            value: 'add',
-                            child: Text('Add Members'),
-                          ),
-                          PopupMenuItem(
-                            value: 'pin',
-                            child: Text(isPinned ? 'Unpin Group' : 'Pin Group'),
-                          ),
-                          const PopupMenuItem(
-                            value: 'exit',
-                            child: Text('Exit Group'),
-                          ),
-                          const PopupMenuDivider(),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Text('Delete Group'),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   );
@@ -369,16 +775,58 @@ class _GroupsScreenState extends State<GroupsScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          // Force a rebuild when returning so UI refreshes if needed
-          await Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const CreateGroupPage()));
-          if (mounted) setState(() {});
-        },
-        label: const Text('Create Group'),
-        icon: const Icon(Icons.group_add),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF4757).withOpacity(0.5),
+              offset: const Offset(0, 4),
+              blurRadius: 20,
+            ),
+            const BoxShadow(
+              color: Colors.black54,
+              offset: Offset(0, 8),
+              blurRadius: 16,
+              spreadRadius: -4,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CreateGroupPage()),
+              );
+              if (mounted) setState(() {});
+            },
+            borderRadius: BorderRadius.circular(30),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.group_add, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text(
+                    'Create Group',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
