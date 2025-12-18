@@ -248,7 +248,8 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         senderName,
@@ -280,13 +281,18 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       gradient: const LinearGradient(
-                                        colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+                                        colors: [
+                                          Color(0xFF4CAF50),
+                                          Color(0xFF66BB6A),
+                                        ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF4CAF50).withOpacity(0.5),
+                                          color: const Color(
+                                            0xFF4CAF50,
+                                          ).withOpacity(0.5),
                                           offset: const Offset(0, 4),
                                           blurRadius: 12,
                                         ),
@@ -297,7 +303,10 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                                       child: InkWell(
                                         onTap: () async {
                                           await _acceptRequest(
-                                              request.id, senderId, currentUser.uid);
+                                            request.id,
+                                            senderId,
+                                            currentUser.uid,
+                                          );
                                         },
                                         borderRadius: BorderRadius.circular(20),
                                         child: const Center(
@@ -321,13 +330,18 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       gradient: const LinearGradient(
-                                        colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                                        colors: [
+                                          Color(0xFFFF4757),
+                                          Color(0xFFFF6B7A),
+                                        ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFFFF4757).withOpacity(0.5),
+                                          color: const Color(
+                                            0xFFFF4757,
+                                          ).withOpacity(0.5),
                                           offset: const Offset(0, 4),
                                           blurRadius: 12,
                                         ),
@@ -372,12 +386,19 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
 
   // ✅ Accept friend request
   Future<void> _acceptRequest(
-      String requestId, String senderId, String receiverId) async {
+    String requestId,
+    String senderId,
+    String receiverId,
+  ) async {
     try {
-      final senderSnapshot =
-          await _firestore.collection('users').doc(senderId).get();
-      final receiverSnapshot =
-          await _firestore.collection('users').doc(receiverId).get();
+      final senderSnapshot = await _firestore
+          .collection('users')
+          .doc(senderId)
+          .get();
+      final receiverSnapshot = await _firestore
+          .collection('users')
+          .doc(receiverId)
+          .get();
 
       if (!senderSnapshot.exists || !receiverSnapshot.exists) return;
 
@@ -397,10 +418,10 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
           .collection('userFriends')
           .doc(receiverId)
           .set({
-        'name': receiverData['name'],
-        'email': receiverData['email'],
-        'addedAt': FieldValue.serverTimestamp(),
-      });
+            'name': receiverData['name'],
+            'email': receiverData['email'],
+            'addedAt': FieldValue.serverTimestamp(),
+          });
 
       await _firestore
           .collection('friends')
@@ -408,18 +429,18 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
           .collection('userFriends')
           .doc(senderId)
           .set({
-        'name': senderData['name'],
-        'email': senderData['email'],
-        'addedAt': FieldValue.serverTimestamp(),
-      });
+            'name': senderData['name'],
+            'email': senderData['email'],
+            'addedAt': FieldValue.serverTimestamp(),
+          });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Friend request accepted ✅")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -435,9 +456,9 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
         const SnackBar(content: Text("Friend request rejected ❌")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 }
