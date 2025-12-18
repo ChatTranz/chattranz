@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'friend_requests_page.dart';
 import 'conversation.dart';
 import 'profile_screen.dart';
+import 'create_group.dart';
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
@@ -132,10 +133,10 @@ class _ChatListPageState extends State<ChatListPage> {
                     );
                   }
                   if (value == 'create_group') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Group creation coming soon'),
-                        backgroundColor: Color(0xFF2A2A2A),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CreateGroupPage(),
                       ),
                     );
                   }
