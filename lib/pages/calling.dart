@@ -174,7 +174,7 @@ class _CallingScreenState extends State<CallingScreen> {
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 60.0),
-              child: _status == 'answered'
+              child: _status == 'answered' || _isCaller
                   ? SizedBox(
                       width: 200,
                       height: 60,
