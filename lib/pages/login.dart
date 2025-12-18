@@ -66,24 +66,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Logo with Neumorphic container
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1E1E1E),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.white.withOpacity(0.05),
-                          offset: const Offset(-4, -4),
-                          blurRadius: 10,
+                          offset: const Offset(-5, -5),
+                          blurRadius: 12,
                         ),
                         const BoxShadow(
                           color: Colors.black54,
-                          offset: Offset(4, 4),
-                          blurRadius: 10,
+                          offset: Offset(5, 5),
+                          blurRadius: 12,
                         ),
                       ],
                     ),
-                    child: Image.asset('assets/loadingLogo.png', height: 80),
+                    child: Image.asset('assets/loadingLogo.png', height: 120),
                   ),
                   const SizedBox(height: 30),
 
