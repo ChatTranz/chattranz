@@ -296,7 +296,7 @@ class _ChatPageState extends State<ChatPage> {
     final currentUser = _auth.currentUser!;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120),
         child: Column(
@@ -313,15 +313,27 @@ class _ChatPageState extends State<ChatPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Text(
-                    "Message",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ShaderMask(
+                    blendMode: BlendMode.srcIn,
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds),
+                    child: const Text(
+                      "Message",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.more_vert),
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
                     onPressed: () {},
                   ),
                 ],
@@ -333,10 +345,22 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 25,
-                    backgroundImage: NetworkImage(
-                      "https://i.pravatar.cc/150?img=3",
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Color(0xFF252525),
+                      backgroundImage: NetworkImage(
+                        "https://i.pravatar.cc/150?img=3",
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -349,17 +373,21 @@ class _ChatPageState extends State<ChatPage> {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                         const Text(
                           "Online",
-                          style: TextStyle(color: Colors.green, fontSize: 12),
+                          style: TextStyle(color: Color(0xFF4CAF50), fontSize: 12),
                         ),
                       ],
                     ),
                   ),
                   DropdownButton<String>(
                     value: preferredLang,
+                    dropdownColor: const Color(0xFF252525),
+                    style: const TextStyle(color: Colors.white),
+                    iconEnabledColor: Colors.white,
                     onChanged: (String? newLang) {
                       if (newLang == null) return;
                       setState(() => preferredLang = newLang);
@@ -402,7 +430,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.call, color: Colors.blue),
+                    icon: const Icon(Icons.call, color: Color(0xFFFF4757)),
                     onPressed: () {},
                   ),
                 ],
@@ -439,13 +467,22 @@ class _ChatPageState extends State<ChatPage> {
                         margin: const EdgeInsets.symmetric(vertical: 4),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isMe ? Colors.blue : Colors.white,
+                          gradient: isMe
+                              ? const LinearGradient(
+                                  colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                              : null,
+                          color: isMe ? null : const Color(0xFF252525),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isMe
-                                ? Colors.blueAccent
-                                : Colors.grey.shade300,
-                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
                         child: isMe
                             ? // Sender's own message: show only the original text
@@ -461,14 +498,14 @@ class _ChatPageState extends State<ChatPage> {
                                     (msg['displayText'] ?? msg['text'] ?? '')
                                         .toString(),
                                     style: const TextStyle(
-                                      color: Colors.black87,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     (msg['text'] ?? '').toString(),
-                                    style: const TextStyle(
-                                      color: Colors.grey,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.5),
                                       fontSize: 10,
                                     ),
                                   ),
@@ -491,7 +528,7 @@ class _ChatPageState extends State<ChatPage> {
                   IconButton(
                     icon: const Icon(
                       Icons.add_circle_outline,
-                      color: Colors.blue,
+                      color: Color(0xFFFF4757),
                     ),
                     onPressed: () {
                       setState(() {
@@ -503,25 +540,55 @@ class _ChatPageState extends State<ChatPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color(0xFF252525),
                         borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.grey.shade300),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.03),
+                            offset: const Offset(-2, -2),
+                            blurRadius: 4,
+                          ),
+                          const BoxShadow(
+                            color: Colors.black87,
+                            offset: Offset(2, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
                       ),
                       child: TextField(
                         controller: _messageController,
-                        decoration: const InputDecoration(
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: "Type a message...",
+                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  CircleAvatar(
-                    backgroundColor: Colors.blue,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white),
-                      onPressed: () => sendMessage(_messageController.text),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF4757), Color(0xFFFF6B7A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF4757).withOpacity(0.5),
+                          offset: const Offset(0, 4),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: () => sendMessage(_messageController.text),
+                      ),
                     ),
                   ),
                 ],
