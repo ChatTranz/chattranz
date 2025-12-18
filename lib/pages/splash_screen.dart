@@ -36,26 +36,18 @@ class _SplashScreenState extends State<SplashScreen> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: const Color(0xFF0A66C2), // Your app color
+              color: const Color.fromARGB(235, 255, 255, 255), // Your app color
               shape: BoxShape.circle,
             ),
             child: Center(
               // Replace with your logo
               child: Image.asset(
-                'assets/logo.png', // Your logo path
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
+                'assets/loadingLogo.png', 
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
               ),
-              // Or use text like LinkedIn:
-              // child: const Text(
-              //   'CT',
-              //   style: TextStyle(
-              //     color: Colors.white,
-              //     fontSize: 60,
-              //     fontWeight: FontWeight.bold,
-              //   ),
-              // ),
+              
             ),
           ),
           size: 200,
@@ -126,7 +118,7 @@ class _AnimatedLoadingLogoState extends State<AnimatedLoadingLogo>
                 size: Size(widget.size, widget.size),
                 painter: PulseRingPainter(
                   progress: _controller.value,
-                  baseColor: const Color(0xFF0A66C2),
+                  baseColor: const Color.fromARGB(255, 203, 50, 155),
                   intensity: _glowAnimation.value,
                 ),
               );

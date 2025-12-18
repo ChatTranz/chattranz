@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/chat_icon.png', // same icon as register page
+                    'assets/loadingLogo.png', // same icon as register page
                     height: 100,
                   ),
                   const SizedBox(height: 20),

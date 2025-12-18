@@ -32,11 +32,12 @@ class _ChatListPageState extends State<ChatListPage> {
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: CircleAvatar(
-            backgroundColor: Colors.white,
-            child: Icon(
-              Icons.chat_bubble,
-              color: const Color(0xFF1976D2),
-              size: 24,
+            backgroundColor: const Color.fromARGB(230, 255, 255, 255),
+            child: Image.asset(
+                'assets/loadingLogo.png', 
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
             ),
           ),
         ),
