@@ -69,7 +69,7 @@ class _ChatListPageState extends State<ChatListPage> {
                   ],
                 ),
                 child: CircleAvatar(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: const Color.fromARGB(0, 0, 0, 0),
                   child: Image.asset(
                     'assets/loadingLogo.png',
                     width: 30,
