@@ -97,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'Sign Up to ChatTranz',
+                          'Sign Up',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
