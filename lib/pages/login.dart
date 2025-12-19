@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'Welcome Back ',
+                          'Welcome ',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
