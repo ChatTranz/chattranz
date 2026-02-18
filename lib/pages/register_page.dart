@@ -83,11 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.chat_bubble_rounded,
-                      size: 80,
-                      color: Color(0xFFFF4757),
-                    ),
+                    child: Image.asset('assets/loadingLogo.png', height: 120),
                   ),
                   const SizedBox(height: 30),
                   Row(
@@ -101,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: const Text(
-                          'Hello Sign Up ',
+                          'Sign Up',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
@@ -109,13 +105,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                      const Text(
-                        '👋',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      // const Text(
+                      //   '👋',
+                      //   style: TextStyle(
+                      //     fontSize: 32,
+                      //     fontWeight: FontWeight.bold,
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 8),
