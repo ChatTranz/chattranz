@@ -21,7 +21,6 @@ class _ChatPageState extends State<ChatPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool showAttachmentOptions = false;
   // User's preferred language code for receive-side translation
   // Examples: 'en' (English), 'si' (Sinhala), 'ta' (Tamil), 'fr' (French)
   String preferredLang = 'en';
@@ -614,17 +613,6 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      color: Color(0xFFFF4757),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        showAttachmentOptions = !showAttachmentOptions;
-                      });
-                    },
-                  ),
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
