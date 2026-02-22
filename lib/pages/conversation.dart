@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:chattranz/services/translation_service.dart';
+import 'package:chattranz/services/call_service.dart';
+import 'package:chattranz/pages/calling.dart';
 
 class ChatPage extends StatefulWidget {
   final String friendId;
@@ -488,7 +490,36 @@ class _ChatPageState extends State<ChatPage> {
                   const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.call, color: Color(0xFFFF4757)),
-                    onPressed: () {},
+                    onPressed: () async {
+                      try {
+                        final callService = CallService();
+                        final callId = await callService.startCall(
+                          receiverId: widget.friendId,
+                          receiverName: widget.friendName,
+                        );
+                        if (mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CallingScreen(
+                                callId: callId,
+                                friendId: widget.friendId,
+                                friendName: widget.friendName,
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to start call: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
                   ),
                 ],
               ),
